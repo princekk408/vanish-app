@@ -447,30 +447,66 @@ async function initSession(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ document.getElementById('auth-screen').style.display='flex'; document.getElementById('app').classList.remove('shown'); return; }
   me = session.user;
-  let { data: prof } = await sb.from('vanish_profiles').select('*').eq('id', me.id).maybeSingle();
+
+  let prof;
+  try{
+    const res = await sb.from('vanish_profiles').select('*').eq('id', me.id).maybeSingle();
+    if(res.error) throw res.error;
+    prof = res.data;
+  } catch(e){
+    console.error('Profile load failed:', e);
+    document.getElementById('app').classList.remove('shown');
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('li-err').textContent = 'Could not load your profile: ' + (e.message || e) + '. Check your connection and try logging in again.';
+    return;
+  }
+
   if(!prof){
+    document.getElementById('app').classList.remove('shown');
     document.getElementById('auth-screen').style.display='flex';
     document.getElementById('li-err').textContent = 'Your account exists but has no profile yet. This can happen if email confirmation is still pending, or if signup was interrupted. Try creating the account again, or contact support.';
     return;
   }
-  myProfile = prof;
-  applyTheme(myProfile.dark_mode === false ? 'light' : 'dark');
+
+  // Load everything BEFORE switching away from the auth screen, so a failed
+  // background call never leaves the user staring at a blank screen.
+  try{
+    myProfile = prof;
+    applyTheme(myProfile.dark_mode === false ? 'light' : 'dark');
+    document.getElementById('my-avatar-nav').textContent = initials(myProfile.username);
+    if(myProfile.is_admin) document.getElementById('admin-nav-btn').style.display='flex';
+    await loadChats();
+    await loadFriends();
+    await loadStatuses();
+    await loadNotes();
+    await loadVault();
+    renderSettings();
+  } catch(e){
+    console.error('App data load failed:', e);
+    document.getElementById('app').classList.remove('shown');
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('li-err').textContent = 'Logged in, but something failed to load: ' + (e.message || e) + '. Please try again.';
+    return;
+  }
+
+  // Only now is it safe to reveal the app.
   document.getElementById('auth-screen').style.display='none';
   document.getElementById('app').classList.add('shown');
-  document.getElementById('my-avatar-nav').textContent = initials(myProfile.username);
-  if(myProfile.is_admin) document.getElementById('admin-nav-btn').style.display='flex';
-  await loadChats();
-  await loadFriends();
-  await loadStatuses();
-  await loadNotes();
-  await loadVault();
-  renderSettings();
   subscribeRealtime();
   subscribeCallChannel();
   setInterval(tickCountdowns, 1000);
   setInterval(()=>{ loadChats(); loadStatuses(); }, 30000);
 }
-sb.auth.getSession().then(({data:{session}})=>{ if(session) initSession().catch(e=>console.error('Auto-login failed:', e)); });
+sb.auth.getSession().then(({data:{session}})=>{
+  if(session){
+    initSession().catch(e=>{
+      console.error('Auto-login failed:', e);
+      document.getElementById('app').classList.remove('shown');
+      document.getElementById('auth-screen').style.display='flex';
+      document.getElementById('li-err').textContent = 'Something went wrong loading your session: ' + (e.message || e) + '. Please try logging in again.';
+    });
+  }
+});
 
 function initials(name){ return (name||'?').slice(0,2).toUpperCase(); }
 
