@@ -144,6 +144,20 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent1);}
 .admin-table th{text-align:left; color:var(--muted); font-weight:500; padding:10px 8px; border-bottom:1px solid var(--border); font-size:12px;}
 .admin-table td{padding:10px 8px; border-bottom:1px solid var(--border);}
 
+.call-overlay{position:fixed; inset:0; background:#0B0B12; z-index:250; display:flex; flex-direction:column; align-items:center; justify-content:space-between; color:#fff; padding:40px 0;}
+.call-remote-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#000;}
+.call-local-video{position:absolute; bottom:120px; right:20px; width:104px; height:144px; border-radius:14px; object-fit:cover; border:2px solid rgba(255,255,255,.3); z-index:2; background:#111;}
+.call-info{z-index:2; text-align:center;}
+.call-avatar-big{width:96px; height:96px; border-radius:50%; background:var(--grad); display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:700; margin:0 auto 14px; color:#fff;}
+.call-name{font-size:19px; font-weight:600;}
+.call-status{font-size:13.5px; color:rgba(255,255,255,.65); margin-top:4px; font-family:'JetBrains Mono',monospace;}
+.call-controls{z-index:2; display:flex; gap:18px;}
+.call-btn{width:56px; height:56px; border-radius:50%; background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; font-size:22px; color:#fff;}
+.call-btn.end{background:var(--danger);}
+.call-btn.active-toggle{background:#fff; color:#000;}
+.incoming-modal{background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:28px; text-align:center; width:100%; max-width:320px; color:var(--text);}
+.incoming-actions{display:flex; gap:16px; justify-content:center; margin-top:22px;}
+
 @media(max-width:880px){
   #app.shown{grid-template-columns:0 0 1fr;}
   #nav,#panel{display:none;}
@@ -294,6 +308,8 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent1);}
         <div class="avatar sm" id="ch-avatar"></div>
         <div><div class="ch-name" id="ch-name"></div><div class="ch-sub" id="ch-sub"></div></div>
         <div class="chat-head-actions">
+          <button class="icon-btn" onclick="startCall('voice')" title="Voice call">📞</button>
+          <button class="icon-btn" onclick="startCall('video')" title="Video call">🎥</button>
           <button class="icon-btn" onclick="toggleBlockCurrent()" title="Block">🚫</button>
         </div>
       </div>
@@ -314,6 +330,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent1);}
 <!-- Generic modal mount point -->
 <div id="modal-root"></div>
 <div id="viewer-root"></div>
+<div id="call-root"></div>
 <div id="toast-root"></div>
 
 <script>
@@ -440,6 +457,7 @@ async function initSession(){
   await loadVault();
   renderSettings();
   subscribeRealtime();
+  subscribeCallChannel();
   setInterval(tickCountdowns, 1000);
   setInterval(()=>{ loadChats(); loadStatuses(); }, 30000);
 }
@@ -962,6 +980,203 @@ async function renderAdminTable(){
   if(old) old.remove();
   container.id='admin-table-wrap';
   document.getElementById('panel-admin').appendChild(container);
+}
+
+/* ---------------- VOICE / VIDEO CALLS (WebRTC + Supabase Realtime signaling) ----------------
+   Nothing about a call is stored in the database — only a short text
+   summary message ("Voice call · 1m 4s") is dropped into the chat afterward,
+   which then follows the same 5-hour auto-delete as every other message.
+   No TURN server is configured, only free public STUN servers. This works
+   on most home/mobile networks but can fail behind strict corporate or
+   school firewalls. If that happens, add a TURN server (e.g. Twilio,
+   metered.ca — both have free tiers) to ICE_SERVERS below. */
+const ICE_SERVERS = { iceServers: [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' }
+]};
+
+let myCallChannel = null;
+let activeCall = null;
+
+function subscribeCallChannel(){
+  myCallChannel = sb.channel('call-'+me.id);
+  myCallChannel.on('broadcast', { event:'incoming-call' }, ({payload})=> handleIncomingCall(payload));
+  myCallChannel.subscribe();
+}
+
+async function startCall(type){
+  if(!currentChat || currentChat.is_group){ toast('Calls are only available in 1-to-1 chats for now.'); return; }
+  if(activeCall){ toast('You are already on a call.'); return; }
+  const otherId = currentChat.otherUserId;
+  const otherUsername = currentChat.name.replace('@','');
+  const callId = crypto.randomUUID();
+
+  let localStream;
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video: type==='video' });
+  } catch(e){ toast('Could not access microphone/camera: '+e.message); return; }
+
+  const pc = new RTCPeerConnection(ICE_SERVERS);
+  localStream.getTracks().forEach(t=>pc.addTrack(t, localStream));
+  const sessionChannel = sb.channel('call-session-'+callId);
+  activeCall = { callId, peerId: otherId, peerUsername: otherUsername, type, pc, sessionChannel, localStream, startedAt:null, accepted:false, timerInterval:null };
+
+  pc.onicecandidate = (e)=>{ if(e.candidate) sessionChannel.send({type:'broadcast', event:'ice', payload:{candidate:e.candidate, from:me.id}}); };
+  pc.ontrack = (e)=> attachRemoteStream(e.streams[0]);
+  pc.onconnectionstatechange = ()=>{ if(pc.connectionState==='failed'){ toast('Call connection failed.'); endCall(false); } };
+
+  sessionChannel.on('broadcast', {event:'answer'}, async ({payload})=>{
+    if(payload.from === me.id || !activeCall) return;
+    await pc.setRemoteDescription(new RTCSessionDescription(payload.answer));
+    activeCall.accepted = true; activeCall.startedAt = Date.now();
+    renderCallUI('connected');
+  });
+  sessionChannel.on('broadcast', {event:'ice'}, async ({payload})=>{
+    if(payload.from === me.id) return;
+    try{ await pc.addIceCandidate(payload.candidate); }catch(e){}
+  });
+  sessionChannel.on('broadcast', {event:'declined'}, ()=>{ toast('@'+otherUsername+' declined the call.'); endCall(false); });
+  sessionChannel.on('broadcast', {event:'end'}, ({payload})=>{ if(payload.from!==me.id) endCall(false); });
+  await new Promise(res=> sessionChannel.subscribe(status=>{ if(status==='SUBSCRIBED') res(); }));
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  const ringChannel = sb.channel('call-'+otherId);
+  await new Promise(res=> ringChannel.subscribe(status=>{ if(status==='SUBSCRIBED') res(); }));
+  ringChannel.send({ type:'broadcast', event:'incoming-call', payload:{ callId, type, offer, from: me.id, fromUsername: myProfile.username } });
+  setTimeout(()=> ringChannel.unsubscribe(), 2000);
+
+  renderCallUI('calling');
+}
+
+function handleIncomingCall(payload){
+  if(activeCall){
+    const tmp = sb.channel('call-session-'+payload.callId);
+    tmp.subscribe(status=>{ if(status==='SUBSCRIBED'){ tmp.send({type:'broadcast',event:'declined',payload:{from:me.id}}); setTimeout(()=>tmp.unsubscribe(),500); } });
+    return;
+  }
+  showIncomingCallModal(payload);
+}
+
+function showIncomingCallModal(payload){
+  const root = document.getElementById('call-root');
+  const overlay = document.createElement('div'); overlay.className='call-overlay'; overlay.id='incoming-overlay';
+  overlay.innerHTML = `<div style="flex:1;"></div>
+    <div class="incoming-modal">
+      <div class="call-avatar-big">${initials(payload.fromUsername)}</div>
+      <div class="call-name">@${payload.fromUsername}</div>
+      <div class="call-status">Incoming ${payload.type==='video'?'video':'voice'} call…</div>
+      <div class="incoming-actions">
+        <button class="call-btn end" id="decline-btn">✕</button>
+        <button class="call-btn" style="background:var(--accent2);" id="accept-btn">${payload.type==='video'?'🎥':'📞'}</button>
+      </div>
+    </div><div style="flex:1;"></div>`;
+  root.appendChild(overlay);
+  document.getElementById('decline-btn').onclick = ()=>{
+    const tmp = sb.channel('call-session-'+payload.callId);
+    tmp.subscribe(status=>{ if(status==='SUBSCRIBED'){ tmp.send({type:'broadcast',event:'declined',payload:{from:me.id}}); setTimeout(()=>tmp.unsubscribe(),500); } });
+    overlay.remove();
+  };
+  document.getElementById('accept-btn').onclick = ()=> acceptCall(payload, overlay);
+}
+
+async function acceptCall(payload, modalOverlay){
+  let localStream;
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video: payload.type==='video' });
+  } catch(e){ toast('Could not access microphone/camera: '+e.message); modalOverlay.remove(); return; }
+
+  const pc = new RTCPeerConnection(ICE_SERVERS);
+  localStream.getTracks().forEach(t=>pc.addTrack(t, localStream));
+  const sessionChannel = sb.channel('call-session-'+payload.callId);
+  activeCall = { callId:payload.callId, peerId:payload.from, peerUsername:payload.fromUsername, type:payload.type, pc, sessionChannel, localStream, startedAt:Date.now(), accepted:true, timerInterval:null };
+
+  pc.onicecandidate = (e)=>{ if(e.candidate) sessionChannel.send({type:'broadcast', event:'ice', payload:{candidate:e.candidate, from:me.id}}); };
+  pc.ontrack = (e)=> attachRemoteStream(e.streams[0]);
+  pc.onconnectionstatechange = ()=>{ if(pc.connectionState==='failed'){ toast('Call connection failed.'); endCall(false); } };
+  sessionChannel.on('broadcast', {event:'ice'}, async ({payload:p})=>{ if(p.from===me.id) return; try{ await pc.addIceCandidate(p.candidate); }catch(e){} });
+  sessionChannel.on('broadcast', {event:'end'}, ({payload:p})=>{ if(p.from!==me.id) endCall(false); });
+
+  await new Promise(res=> sessionChannel.subscribe(status=>{ if(status==='SUBSCRIBED') res(); }));
+  await pc.setRemoteDescription(new RTCSessionDescription(payload.offer));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  sessionChannel.send({ type:'broadcast', event:'answer', payload:{ answer, from: me.id } });
+
+  modalOverlay.remove();
+  renderCallUI('connected');
+}
+
+function attachRemoteStream(stream){
+  const vid = document.getElementById('call-remote-video');
+  if(vid) vid.srcObject = stream;
+}
+
+function renderCallUI(state){
+  document.getElementById('incoming-overlay')?.remove();
+  let overlay = document.getElementById('active-call-overlay');
+  if(!overlay){
+    overlay = document.createElement('div'); overlay.className='call-overlay'; overlay.id='active-call-overlay';
+    document.getElementById('call-root').appendChild(overlay);
+  }
+  const isVideo = activeCall.type==='video';
+  overlay.innerHTML = `
+    ${isVideo?`<video id="call-remote-video" class="call-remote-video" autoplay playsinline></video>
+    <video id="call-local-video" class="call-local-video" autoplay playsinline muted></video>`:''}
+    <div class="call-info">
+      ${!isVideo?`<div class="call-avatar-big">${initials(activeCall.peerUsername)}</div>`:''}
+      <div class="call-name">@${activeCall.peerUsername}</div>
+      <div class="call-status" id="call-status-text">${state==='calling'?'Calling…':'Connected'}</div>
+    </div>
+    <div class="call-controls">
+      <button class="call-btn" id="mute-btn" title="Mute">🎤</button>
+      ${isVideo?`<button class="call-btn" id="cam-btn" title="Camera">📷</button>`:''}
+      <button class="call-btn end" id="end-call-btn" title="End call">📞</button>
+    </div>`;
+  if(isVideo){ document.getElementById('call-local-video').srcObject = activeCall.localStream; }
+  document.getElementById('end-call-btn').onclick = ()=> endCall(true);
+  document.getElementById('mute-btn').onclick = ()=>{
+    const track = activeCall.localStream.getAudioTracks()[0];
+    track.enabled = !track.enabled;
+    document.getElementById('mute-btn').classList.toggle('active-toggle', !track.enabled);
+  };
+  if(isVideo){
+    document.getElementById('cam-btn').onclick = ()=>{
+      const track = activeCall.localStream.getVideoTracks()[0];
+      track.enabled = !track.enabled;
+      document.getElementById('cam-btn').classList.toggle('active-toggle', !track.enabled);
+    };
+  }
+  if(state==='connected' && !activeCall.timerInterval){
+    activeCall.startedAt = activeCall.startedAt || Date.now();
+    activeCall.timerInterval = setInterval(()=>{
+      if(!activeCall) return;
+      const secs = Math.floor((Date.now()-activeCall.startedAt)/1000);
+      const m = String(Math.floor(secs/60)).padStart(2,'0'), s = String(secs%60).padStart(2,'0');
+      const el = document.getElementById('call-status-text'); if(el) el.textContent = `${m}:${s}`;
+    }, 1000);
+  }
+}
+
+async function endCall(notifyPeer){
+  if(!activeCall) return;
+  const { pc, localStream, sessionChannel, peerId, peerUsername, type, startedAt, accepted, timerInterval } = activeCall;
+  if(notifyPeer){ try{ sessionChannel.send({type:'broadcast', event:'end', payload:{from:me.id}}); }catch(e){} }
+  if(timerInterval) clearInterval(timerInterval);
+  try{ localStream.getTracks().forEach(t=>t.stop()); }catch(e){}
+  try{ pc.close(); }catch(e){}
+  try{ sessionChannel.unsubscribe(); }catch(e){}
+  document.getElementById('active-call-overlay')?.remove();
+  document.getElementById('incoming-overlay')?.remove();
+
+  if(currentChat && currentChat.otherUserId === peerId){
+    const durSecs = accepted && startedAt ? Math.floor((Date.now()-startedAt)/1000) : 0;
+    const kind = type==='video' ? '🎥 Video' : '📞 Voice';
+    const label = accepted ? `${kind} call · ${Math.floor(durSecs/60)}m ${durSecs%60}s` : `${kind} call · missed`;
+    sb.from('vanish_messages').insert({ chat_id: currentChat.id, sender_id: me.id, content: label, media_type:'text' });
+  }
+  activeCall = null;
 }
 
 /* ---------------- MODALS ---------------- */
