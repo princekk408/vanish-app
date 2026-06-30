@@ -406,7 +406,12 @@ async function doLogin(){
   errEl.textContent = '';
   const { error } = await sb.auth.signInWithPassword({ email, password: pass });
   if(error){ errEl.textContent = error.message; return; }
-  await initSession();
+  try{
+    await initSession();
+  } catch(e){
+    console.error('Login succeeded but profile load failed:', e);
+    errEl.textContent = 'Logged in, but failed to load your profile: ' + (e.message || e);
+  }
 }
 
 async function sendResetCode(){
@@ -443,7 +448,11 @@ async function initSession(){
   if(!session){ document.getElementById('auth-screen').style.display='flex'; document.getElementById('app').classList.remove('shown'); return; }
   me = session.user;
   let { data: prof } = await sb.from('vanish_profiles').select('*').eq('id', me.id).maybeSingle();
-  if(!prof){ document.getElementById('auth-screen').style.display='flex'; return; } // profile row missing (edge case)
+  if(!prof){
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('li-err').textContent = 'Your account exists but has no profile yet. This can happen if email confirmation is still pending, or if signup was interrupted. Try creating the account again, or contact support.';
+    return;
+  }
   myProfile = prof;
   applyTheme(myProfile.dark_mode === false ? 'light' : 'dark');
   document.getElementById('auth-screen').style.display='none';
@@ -461,7 +470,7 @@ async function initSession(){
   setInterval(tickCountdowns, 1000);
   setInterval(()=>{ loadChats(); loadStatuses(); }, 30000);
 }
-sb.auth.getSession().then(({data:{session}})=>{ if(session) initSession(); });
+sb.auth.getSession().then(({data:{session}})=>{ if(session) initSession().catch(e=>console.error('Auto-login failed:', e)); });
 
 function initials(name){ return (name||'?').slice(0,2).toUpperCase(); }
 
