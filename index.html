@@ -1,520 +1,1135 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>School Result & Mock Management System</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>De-Trinity Result Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://ucerqmewibwkxdgtgqvc.supabase.co">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#667085;--line:#e4e7ec;--primary:#2457d6;--primary2:#183ea0;--ok:#07845b;--warn:#b54708;--danger:#c43232;--shadow:0 8px 30px rgba(16,24,40,.07);--radius:16px}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-button,input,select,textarea{font:inherit}button{cursor:pointer}.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:12px 18px}.brand{font-weight:800}.brand small{display:block;color:var(--muted);font-weight:500}.wrap{max-width:1400px;margin:auto;padding:18px}.layout{display:grid;grid-template-columns:240px 1fr;gap:18px}.side{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:10px;height:max-content;position:sticky;top:76px}.side button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:11px 12px;border-radius:10px;margin:2px 0;color:var(--text)}.side button.active,.side button:hover{background:#edf2ff;color:var(--primary);font-weight:700}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:16px}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.stat{padding:16px;border:1px solid var(--line);border-radius:14px;background:#fff}.stat b{font-size:26px;display:block}.muted{color:var(--muted)}h1,h2,h3{margin:0 0 8px}.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700}.primary{background:var(--primary);color:#fff}.secondary{background:#eef2f7;color:var(--text)}.danger{background:#fee4e2;color:#b42318}.ok{background:#dcfae9;color:#067647}.small{font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap}.field label{display:block;font-weight:650;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;padding:10px 11px;border:1px solid #d0d5dd;border-radius:10px;background:#fff}.field textarea{min-height:80px;resize:vertical}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}.table{width:100%;border-collapse:collapse;min-width:780px}.table th,.table td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.table th{background:#f8fafc;font-size:12px;color:#475467}.pill{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#eef2ff;color:#3448a0;font-size:12px;font-weight:700}.hidden{display:none!important}.toast{position:fixed;right:18px;bottom:18px;z-index:100;background:#101828;color:#fff;padding:12px 16px;border-radius:10px;box-shadow:var(--shadow)}.login{min-height:100vh;display:grid;place-items:center;padding:20px}.loginbox{width:min(560px,100%)}.brandmark{font-size:25px;font-weight:900;margin-bottom:4px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tab{border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:9px}.tab.active{background:#edf2ff;color:var(--primary);border-color:#b9c7ff;font-weight:800}.notice{padding:11px 13px;border-radius:10px;background:#fff8e8;color:#7a4a00;border:1px solid #f3d58c}.result-preview{background:#fff;border:1px solid #bbb;padding:25px;color:#111}.result-head{text-align:center;border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:10px}.result-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-size:12px}.result-table{width:100%;border-collapse:collapse;font-size:11px}.result-table th,.result-table td{border:1px solid #444;padding:5px;text-align:center}.result-table th:first-child,.result-table td:first-child{text-align:left}.result-footer{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:35px;font-size:11px}.sig{border-top:1px solid #222;padding-top:5px;text-align:center;min-height:35px}.profile-check{padding:12px;border:1px solid var(--line);border-radius:12px;background:#f8fafc;margin-top:12px}.profile-check.good{background:#ecfdf3;border-color:#abefc6}.profile-check.warn{background:#fffaeb;border-color:#fedf89}.profile-progress{height:8px;background:#e4e7ec;border-radius:999px;overflow:hidden;margin:8px 0}.profile-progress>span{display:block;height:100%;background:var(--primary);border-radius:999px}.preview-note{font-size:12px;color:var(--muted);margin-top:6px}.live-preview{border:1px dashed #98a2b3;border-radius:12px;padding:12px;background:#f8fafc}.missing-list{margin:6px 0 0 18px}.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;padding:18px;z-index:50}.modalbox{background:#fff;border-radius:16px;width:min(850px,100%);max-height:90vh;overflow:auto;padding:18px}.close{float:right;border:0;background:#eee;border-radius:8px;padding:5px 9px}.q{border:1px solid var(--line);padding:12px;border-radius:12px;margin:10px 0}.option{display:block;padding:8px;margin-top:5px;border:1px solid var(--line);border-radius:8px}.mobile-only{display:none}.subject-picker{border:1px solid var(--line);border-radius:12px;padding:12px;background:#f8fafc}.subject-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}.subject-check{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:9px;background:#fff}.result-status{padding:8px 10px;border-radius:9px;background:#fff8e8;color:#7a4a00;border:1px solid #f3d58c;font-size:12px}.result-status.ok{background:#ecfdf3;color:#067647;border-color:#abefc6}
-@media(max-width:900px){.layout{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto;gap:4px}.side button{white-space:nowrap}.g4,.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.mobile-only{display:block}.result-meta{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.wrap{padding:10px}.g2,.g3,.g4{grid-template-columns:1fr}.top{padding:10px}.result-footer{grid-template-columns:1fr}}
-@media print{body{background:#fff}.top,.side,#app>div:not(.printable),.no-print{display:none!important}.wrap{max-width:none;padding:0}.layout{display:block}.printable{display:block!important;box-shadow:none;border:0}.result-preview{border:0}.modal{position:static;background:#fff;padding:0}.modalbox{width:100%;max-height:none;box-shadow:none}.modal .no-print{display:none!important}}
+#bootLoader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#f2eee9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;z-index:9999}
+#bootLoader .spinner{width:40px;height:40px;border-radius:50%;border:4px solid #e2dbd3;border-top-color:#1e1435;animation:bootspin .8s linear infinite}
+@keyframes bootspin{to{transform:rotate(360deg)}}
+#bootLoader p{color:#7a6f7a;font-size:14px;margin:0;text-align:center;padding:0 24px}
+#bootLoader.slow p{color:#b13a30;font-weight:600}
+#bootLoader button{display:none;padding:10px 22px;border-radius:999px;border:none;background:#1e1435;color:#fff;font-weight:600;font-size:14px;cursor:pointer;margin-top:6px}
+#bootLoader.slow button{display:inline-block}
+:root{
+  --bg:#f2eee9;--surface:#ffffff;--surface-2:#f8f5f1;--border:#e2dbd3;--ink:#1a1425;--muted:#7a6f7a;
+  --primary:#1e1435;--primary-2:#2c1f4a;--accent:#d4a84b;--accent-2:#c4963a;
+  --success:#0f8a4b;--success-bg:#e7f6ee;--danger:#b13a30;--danger-bg:#fbeaea;--warn:#8a6a0c;--warn-bg:#fdf1de;
+  --radius:16px;--radius-sm:10px;
+  --shadow-sm:0 2px 8px rgba(30,20,53,.06);--shadow-md:0 12px 40px rgba(30,20,53,.1);--shadow-lg:0 20px 60px rgba(30,20,53,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3{letter-spacing:-.02em;font-weight:800}
+h2{font-size:20px}
+h3{font-size:15px;font-weight:700}
+.muted{color:var(--muted);font-size:13.5px}
+a{color:var(--accent-2);text-decoration:none}
+.content{max-width:1100px;margin:0 auto;padding:20px 16px 80px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);margin:14px 0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border-radius:999px;border:none;background:var(--primary);color:#fff;font-weight:700;font-size:14px;cursor:pointer;transition:.2s}
+.btn:hover{opacity:.92}
+.btn.gold{background:var(--accent);color:#1a1425}
+.btn.outline{background:transparent;border:1.5px solid var(--border);color:var(--ink)}
+.btn.danger{background:var(--danger)}
+.btn.sm{padding:7px 13px;font-size:12.5px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+input,select,textarea{width:100%;padding:11px 13px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface);color:var(--ink);font-size:14.5px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary)}
+label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em}
+.field{margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.grid2{grid-template-columns:1fr}}
+.pill{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);font-size:12px;font-weight:700}
+.pill.gold{background:#fdf6e3;border-color:var(--accent);color:var(--accent-2)}
+.pill.green{background:var(--success-bg);color:var(--success)}
+.pill.red{background:var(--danger-bg);color:var(--danger)}
+.banner{padding:12px 14px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:600;margin:10px 0}
+.banner.success{background:var(--success-bg);color:var(--success)}
+.banner.error{background:var(--danger-bg);color:var(--danger)}
+.banner.info{background:var(--surface-2);color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+th{background:var(--surface-2);font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+.topbar{position:sticky;top:0;z-index:50;background:var(--primary);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-md)}
+.topbar .brand{font-weight:800;font-size:15px}
+.navrow{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:49}
+.navrow button{white-space:nowrap;padding:8px 14px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface);color:var(--ink);font-weight:700;font-size:12.5px;cursor:pointer}
+.navrow button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px}
+.list-item:last-child{border-bottom:none}
+.scoreInput{width:64px;padding:6px;text-align:center}
+.qbox{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px}
+.resultSheet{background:#fff;color:#111;padding:24px;border:2px solid #333;max-width:720px;margin:0 auto}
+.resultSheet h1{font-size:19px;text-align:center}
+.resultSheet .sub{text-align:center;font-size:12.5px;margin-bottom:4px}
+.resultSheet .infoGrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;font-size:13px;margin:12px 0}
+.resultSheet table{font-size:12.5px}
+.resultSheet th,.resultSheet td{border:1px solid #333;padding:5px 6px}
+.sigline{margin-top:26px;border-top:1px solid #333;padding-top:4px;font-size:11.5px}
+.stampBox{border:1.5px dashed #999;height:70px;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;margin-top:8px}
+@media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{position:absolute;left:0;top:0;width:100%}
+  .no-print{display:none!important}
+}
 </style>
 </head>
 <body>
-<div id="root"></div>
-<div id="toast" class="toast hidden"></div>
-<script>
-/* ===================== SUPABASE CONFIG ===================== */
-const SUPABASE_URL='https://ucerqmewibwkxdgtgqvc.supabase.co';
-const SUPABASE_ANON_KEY='sb_publishable_6rikKD0Zvl5xOtdVG00sWA_-Xv4H8I_';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-
-/*
-DATABASE EXPECTATION
-Tables used by this single-page app are listed in the SETUP tab in Admin.
-The anon key is safe to place in a browser only when Supabase RLS policies
-are correctly configured. Never put a service_role key in this file.
-*/
-
-const A={user:null,profile:null,page:'dashboard',classId:'',termId:'',selectedStudent:null};
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money=n=>Number(n||0).toLocaleString('en-NG',{minimumFractionDigits:2});
-const toast=(m,good=true)=>{let x=document.getElementById('toast');x.textContent=m;x.classList.remove('hidden');x.style.background=good?'#101828':'#b42318';setTimeout(()=>x.classList.add('hidden'),3000)};
-const el=id=>document.getElementById(id);
-const today=()=>new Date().toISOString().slice(0,10);
-// WAEC grading is calculated in JavaScript from the /100 subject total.
-// No database query is required when a score is graded.
-function grade(s){s=Number(s||0);if(s>=75)return'A1';if(s>=70)return'B2';if(s>=65)return'B3';if(s>=60)return'C4';if(s>=55)return'C5';if(s>=50)return'C6';if(s>=45)return'D7';if(s>=40)return'E8';return'F9'}
-function avg(nums){let a=nums.filter(x=>x!==null&&x!==undefined&&!Number.isNaN(Number(x))).map(Number);return a.length?a.reduce((x,y)=>x+y,0)/a.length:0}
-function fmtDate(x){return x?new Date(x).toLocaleDateString('en-GB'):''}
-function uuid(){return crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)}
-async function q(table,select='*',filters=[]){let z=sb.from(table).select(select);for(const f of filters)z=z[f.op](f.col,f.val);let {data,error}=await z;if(error)throw error;return data||[]}
-async function one(table,select='*',filters=[]){let r=await q(table,select,filters);return r[0]||null}
-async function up(table,row){let {data,error}=await sb.from(table).upsert(row).select();if(error)throw error;return data?.[0]}
-async function ins(table,row){let {data,error}=await sb.from(table).insert(row).select();if(error)throw error;return data?.[0]}
-async function del(table,filters){let z=sb.from(table).delete();for(const f of filters)z=z[f.op](f.col,f.val);let {error}=await z;if(error)throw error}
-
-async function boot(){
-  const {data:{session}}=await sb.auth.getSession();
-  if(!session){return login()}
-  A.user=session.user;
-  try{A.profile=await one('school_profiles','*',[{op:'eq',col:'id',val:session.user.id}]);}
-  catch(e){return fatal(e)}
-  if(!A.profile){return firstProfile()}
-  if(A.profile.role==='admin')return admin();
-  return student();
-}
-sb.auth.onAuthStateChange((_e,s)=>{if(s&&!A.profile){A.user=s.user;setTimeout(boot,50)}});
-function fatal(e){document.getElementById('root').innerHTML='<div class="login"><div class="loginbox card"><h2>Database setup required</h2><p>'+esc(e.message||e)+'</p><p class="muted">Open Admin → Setup after creating the Supabase tables/policies shown there.</p></div></div>'}
-function login(){
-document.getElementById('root').innerHTML=`<div class="login"><div class="loginbox">
-<div class="card"><div class="brandmark">🏫 School Result Manager</div><p class="muted">Results • Mock Tests • Class Ranking • Printing</p>
-<div class="tabs">
-<button class="tab active" onclick="loginTab('admin')">Admin Login</button>
-<button class="tab" onclick="loginTab('student')">Student Login</button>
+<div id="bootLoader">
+  <div class="spinner"></div>
+  <p id="bootLoaderMsg">Loading De-Trinity Result Portal…</p>
+  <button onclick="location.reload()">Retry</button>
 </div>
-<div id="authbox"></div></div></div></div>`;loginTab('signin')}
-function loginTab(mode){
-  document.querySelectorAll('.tabs .tab').forEach((b,i)=>{
-    b.classList.toggle('active',(mode==='admin'?i===0:i===1));
+<div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+'use strict';
+window.__bootSlowTimer = setTimeout(() => {
+  const bl = document.getElementById('bootLoader');
+  if (bl) bl.classList.add('slow');
+}, 8000);
+
+/* ============================================================
+   SUPABASE (same project as Daily Quiz Challenge, new rs_ tables)
+   ============================================================ */
+const SUPABASE_URL = 'https://ucerqmewibwkxdgtgqvc.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_6rikKD0Zvl5xOtdVG00sWA_-Xv4H8I_';
+let sb;
+try {
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch (e) {
+  const bl = document.getElementById('bootLoader');
+  if (bl) { bl.classList.add('slow'); document.getElementById('bootLoaderMsg').textContent = 'App failed to start. Check your connection and retry.'; }
+  throw e;
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const app = $('app');
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid(){ return (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2)); }
+function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}); }
+function fmtDateTime(d){ if(!d) return '—'; return new Date(d).toLocaleString('en-GB', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function toast(msg, type){
+  const el = document.createElement('div');
+  el.className = 'banner ' + (type||'info');
+  el.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:2000;max-width:90%;box-shadow:var(--shadow-md)';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+function ordinal(n){
+  if (n == null) return '—';
+  const s = ['th','st','nd','rd'], v = n % 100;
+  return n + (s[(v-20)%10] || s[v] || s[0]);
+}
+function competitionRank(arr, key){
+  // arr: array of objects with a numeric|null [key]. Ranks descending, ties share rank, next rank skips. Nulls get null rank.
+  const sorted = [...arr].filter(x => x[key] != null).sort((a,b) => b[key]-a[key]);
+  let rank = 0, lastVal = null, seen = 0;
+  const rankMap = new Map();
+  sorted.forEach(item => {
+    seen++;
+    if (item[key] !== lastVal) { rank = seen; lastVal = item[key]; }
+    rankMap.set(item, rank);
+  });
+  return arr.map(x => x[key] == null ? null : (rankMap.get(x) ?? null));
+}
+/* ============================================================
+   SESSION (local)
+   ============================================================ */
+function saveSession(obj){ localStorage.setItem('rs_session', JSON.stringify(obj)); }
+function loadSession(){ try { return JSON.parse(localStorage.getItem('rs_session')); } catch(e){ return null; } }
+function clearSession(){ localStorage.removeItem('rs_session'); }
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+function loginScreen(){
+  app.innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div class="card" style="width:100%;max-width:400px;">
+        <h1 style="text-align:center;font-size:20px;">🏫 De-Trinity Result Portal</h1>
+        <p class="muted" style="text-align:center;margin:6px 0 18px;">Termly academic reports & mock system</p>
+        <div class="navrow" style="position:static;padding:0;border:none;margin-bottom:14px;justify-content:center;">
+          <button id="tabAdmin" class="active" onclick="switchLoginTab('admin')">Admin</button>
+          <button id="tabStudent" onclick="switchLoginTab('student')">Student</button>
+        </div>
+        <div id="loginFormArea"></div>
+      </div>
+    </div>`;
+  switchLoginTab('admin');
+}
+function switchLoginTab(tab){
+  $('tabAdmin')?.classList.toggle('active', tab==='admin');
+  $('tabStudent')?.classList.toggle('active', tab==='student');
+  const area = $('loginFormArea');
+  if (tab === 'admin') {
+    area.innerHTML = `
+      <div class="field"><label>Admin email</label><input type="email" id="adminEmail" placeholder="Admin email"></div>
+      <div class="field"><label>Password</label><input type="password" id="adminPass" placeholder="Enter admin password"></div>
+      <button class="btn" style="width:100%" onclick="doAdminLogin()">Login as Admin</button>
+      <div id="loginMsg"></div>`;
+  } else {
+    area.innerHTML = `
+      <div class="navrow" style="position:static;padding:0;border:none;margin-bottom:12px;justify-content:center;">
+        <button id="stuMethodPass" class="active" onclick="switchStudentMethod('pass')">Name & Password</button>
+        <button id="stuMethodCode" onclick="switchStudentMethod('code')">Profile Code</button>
+      </div>
+      <div id="stuLoginFields"></div>
+      <button class="btn" style="width:100%;margin-top:10px;" onclick="doStudentLogin()">Login as Student</button>
+      <div id="loginMsg"></div>`;
+    switchStudentMethod('pass');
+  }
+}
+function switchStudentMethod(m){
+  $('stuMethodPass')?.classList.toggle('active', m==='pass');
+  $('stuMethodCode')?.classList.toggle('active', m==='code');
+  window._stuLoginMethod = m;
+  const f = $('stuLoginFields');
+  if (m === 'pass') {
+    f.innerHTML = `
+      <div class="field"><label>Full name</label><input id="stuName" placeholder="Your full name as registered"></div>
+      <div class="field"><label>Password</label><input type="password" id="stuPass" placeholder="Password given by your school"></div>`;
+  } else {
+    f.innerHTML = `<div class="field"><label>Profile code</label><input id="stuCode" placeholder="10-digit profile code" maxlength="10"></div>`;
+  }
+}
+async function doAdminLogin(){
+  const email = $('adminEmail').value.trim(), pass = $('adminPass').value;
+  const msg = $('loginMsg');
+  if (!email || !pass) { msg.innerHTML = `<div class="banner error">Enter email and password.</div>`; return; }
+  msg.innerHTML = `<div class="banner info">Checking…</div>`;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { msg.innerHTML = `<div class="banner error">${esc(error.message)}</div>`; return; }
+  saveSession({ role: 'admin' });
+  adminHome();
+}
+async function doStudentLogin(){
+  const msg = $('loginMsg');
+  msg.innerHTML = `<div class="banner info">Checking…</div>`;
+  let query = sb.from('rs_students').select('*, rs_classes(*)');
+  if (window._stuLoginMethod === 'code') {
+    const code = $('stuCode').value.trim();
+    if (!code) { msg.innerHTML = `<div class="banner error">Enter your profile code.</div>`; return; }
+    query = query.eq('profile_code', code);
+  } else {
+    const name = $('stuName').value.trim(), pass = $('stuPass').value;
+    if (!name || !pass) { msg.innerHTML = `<div class="banner error">Enter your name and password.</div>`; return; }
+    query = query.ilike('name', name).eq('password', pass);
+  }
+  const { data, error } = await query.maybeSingle();
+  if (error) { msg.innerHTML = `<div class="banner error">${esc(error.message)}</div>`; return; }
+  if (!data) { msg.innerHTML = `<div class="banner error">Invalid login details.</div>`; return; }
+  saveSession({ role: 'student', id: data.id, name: data.name, classId: data.class_id, className: data.rs_classes?.name });
+  studentHome();
+}
+async function logout(){
+  const s = loadSession();
+  if (s?.role === 'admin') { try { await sb.auth.signOut(); } catch(e){} }
+  clearSession(); loginScreen();
+}
+
+/* ============================================================
+   ADMIN SHELL
+   ============================================================ */
+const ADMIN_TABS = [
+  ['setup','🏗️ Setup'], ['students','🧑‍🎓 Students'], ['subjects','📚 Subjects'],
+  ['scores','✍️ Score Entry'], ['broadsheet','📊 Broadsheet'], ['mocks','📝 Mocks'],
+  ['publish','📢 Publish'], ['lifetime','📁 Lifetime Result'], ['settings','⚙️ Settings']
+];
+function adminShell(bodyHtml, active){
+  app.innerHTML = `
+    <div class="topbar">
+      <span class="brand">🏫 De-Trinity Admin</span>
+      <button class="btn sm outline" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="logout()">Logout</button>
+    </div>
+    <div class="navrow">
+      ${ADMIN_TABS.map(([id,label]) => `<button class="${active===id?'active':''}" onclick="adminNav('${id}')">${label}</button>`).join('')}
+    </div>
+    <div class="content" id="content">${bodyHtml}</div>`;
+}
+function adminNav(id){
+  const fns = { setup: adminSetup, students: adminStudents, subjects: adminSubjects, scores: adminScores,
+    broadsheet: adminBroadsheet, mocks: adminMocks, publish: adminPublish, lifetime: adminLifetime, settings: adminSettings };
+  (fns[id] || adminSetup)();
+}
+function adminHome(){ adminSetup(); }
+
+/* ============================================================
+   STATE (currently selected session/term/class, shared across tabs)
+   ============================================================ */
+const AState = { sessionId: null, termId: null, classId: null };
+
+async function fetchSessions(){ const {data} = await sb.from('rs_sessions').select('*').order('created_at',{ascending:false}); return data||[]; }
+async function fetchTerms(sessionId){ const {data} = await sb.from('rs_terms').select('*').eq('session_id', sessionId).order('created_at'); return data||[]; }
+async function fetchClasses(termId){ const {data} = await sb.from('rs_classes').select('*').eq('term_id', termId).order('name'); return data||[]; }
+async function fetchSubjects(classId){ const {data} = await sb.from('rs_subjects').select('*').eq('class_id', classId).order('name'); return data||[]; }
+async function fetchComponents(termId){ const {data} = await sb.from('rs_components').select('*').eq('term_id', termId).order('sort_order'); return data||[]; }
+async function fetchStudents(classId){ const {data} = await sb.from('rs_students').select('*').eq('class_id', classId).order('name'); return data||[]; }
+
+async function seedComponents(termId){
+  const defaults = [
+    {name:'Test 1', max_score:10, sort_order:1},{name:'Test 2', max_score:10, sort_order:2},
+    {name:'Test 3', max_score:10, sort_order:3},{name:'Test 4', max_score:10, sort_order:4},
+    {name:'Exam', max_score:60, sort_order:5}
+  ];
+  await sb.from('rs_components').insert(defaults.map(d => ({...d, term_id: termId})));
+}
+async function seedGradingScaleIfEmpty(){
+  const { data } = await sb.from('rs_grading_scale').select('id').limit(1);
+  if (data && data.length) return;
+  const scale = [
+    {min_score:75,max_score:100,grade:'A1',remark:'Excellent',sort_order:1},
+    {min_score:70,max_score:74,grade:'B2',remark:'Very Good',sort_order:2},
+    {min_score:65,max_score:69,grade:'B3',remark:'Good',sort_order:3},
+    {min_score:60,max_score:64,grade:'C4',remark:'Credit',sort_order:4},
+    {min_score:55,max_score:59,grade:'C5',remark:'Credit',sort_order:5},
+    {min_score:50,max_score:54,grade:'C6',remark:'Credit',sort_order:6},
+    {min_score:45,max_score:49,grade:'D7',remark:'Pass',sort_order:7},
+    {min_score:40,max_score:44,grade:'E8',remark:'Pass',sort_order:8},
+    {min_score:0,max_score:39,grade:'F9',remark:'Fail',sort_order:9},
+  ];
+  await sb.from('rs_grading_scale').insert(scale);
+}
+async function gradeFor(total){
+  const { data } = await sb.from('rs_grading_scale').select('*').order('sort_order');
+  const row = (data||[]).find(r => total >= r.min_score && total <= r.max_score);
+  return row || { grade:'—', remark:'—' };
+}
+
+/* ---------- SETUP TAB ---------- */
+async function adminSetup(){
+  await seedGradingScaleIfEmpty();
+  adminShell(`<div class="card"><p class="muted">Loading…</p></div>`, 'setup');
+  const sessions = await fetchSessions();
+  if (!AState.sessionId && sessions[0]) AState.sessionId = sessions[0].id;
+  const terms = AState.sessionId ? await fetchTerms(AState.sessionId) : [];
+  if (!AState.termId && terms[0]) AState.termId = terms[0].id;
+  const classes = AState.termId ? await fetchClasses(AState.termId) : [];
+
+  const body = `
+    <div class="card">
+      <div class="top"><h2>🏗️ Sessions & Terms</h2></div>
+      <p class="muted">A session (e.g. 2026/2027) contains terms (First/Second/Third), which contain classes.</p>
+      <div class="grid2" style="margin-top:12px;">
+        <div>
+          <label>Session</label>
+          <select id="selSession" onchange="onSelectSession(this.value)">
+            <option value="">— select —</option>
+            ${sessions.map(s => `<option value="${s.id}" ${s.id===AState.sessionId?'selected':''}>${esc(s.name)}</option>`).join('')}
+          </select>
+          <div class="flex" style="margin-top:8px;">
+            <input id="newSessionName" placeholder="e.g. 2026/2027" style="flex:1;min-width:140px;">
+            <button class="btn sm" onclick="createSession()">+ Add Session</button>
+          </div>
+        </div>
+        <div>
+          <label>Term</label>
+          <select id="selTerm" onchange="onSelectTerm(this.value)" ${!AState.sessionId?'disabled':''}>
+            <option value="">— select —</option>
+            ${terms.map(t => `<option value="${t.id}" ${t.id===AState.termId?'selected':''}>${esc(t.name)}</option>`).join('')}
+          </select>
+          <div class="flex" style="margin-top:8px;">
+            <select id="newTermName" style="flex:1;">
+              <option>First Term</option><option>Second Term</option><option>Third Term</option>
+            </select>
+            <button class="btn sm" onclick="createTerm()" ${!AState.sessionId?'disabled':''}>+ Add Term</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="top"><h2>🏫 Classes</h2></div>
+      ${!AState.termId ? `<p class="muted">Select a session and term first.</p>` : `
+      <div class="flex">
+        <input id="newClassName" placeholder="e.g. SS2A" style="flex:1;min-width:140px;">
+        <button class="btn sm" onclick="createClass()">+ Add Class</button>
+      </div>
+      <div style="margin-top:12px;">
+        ${classes.length === 0 ? `<p class="muted">No classes yet for this term.</p>` : classes.map(c => `
+          <div class="list-item">
+            <span><strong>${esc(c.name)}</strong> ${AState.classId===c.id?'<span class=\"pill gold\">selected</span>':''}</span>
+            <div class="flex">
+              <button class="btn sm outline" onclick="selectClass('${c.id}')">Select</button>
+              <button class="btn sm danger" onclick="deleteClass('${c.id}')">Delete</button>
+            </div>
+          </div>`).join('')}
+      </div>`}
+    </div>
+    <div class="banner info">Selected class is used across Students, Subjects, Score Entry, Broadsheet, Mocks and Publish tabs.</div>
+  `;
+  adminShell(body, 'setup');
+}
+async function onSelectSession(id){ AState.sessionId = id || null; AState.termId = null; AState.classId = null; adminSetup(); }
+async function onSelectTerm(id){ AState.termId = id || null; AState.classId = null; adminSetup(); }
+async function createSession(){
+  const name = $('newSessionName').value.trim();
+  if (!name) return toast('Enter a session name','error');
+  const { error } = await sb.from('rs_sessions').insert({ name });
+  if (error) return toast(error.message,'error');
+  toast('Session created','success'); adminSetup();
+}
+async function createTerm(){
+  const name = $('newTermName').value;
+  const { data, error } = await sb.from('rs_terms').insert({ session_id: AState.sessionId, name }).select().single();
+  if (error) return toast(error.message,'error');
+  await seedComponents(data.id);
+  toast('Term created with default assessment components (Test 1-4 @10, Exam @60)','success');
+  AState.termId = data.id; adminSetup();
+}
+async function createClass(){
+  const name = $('newClassName').value.trim();
+  if (!name) return toast('Enter a class name','error');
+  const { error } = await sb.from('rs_classes').insert({ term_id: AState.termId, name });
+  if (error) return toast(error.message,'error');
+  toast('Class created','success'); adminSetup();
+}
+function selectClass(id){ AState.classId = id; toast('Class selected'); adminSetup(); }
+async function deleteClass(id){
+  if (!confirm('Delete this class and ALL its students, subjects, scores? This cannot be undone.')) return;
+  await sb.from('rs_classes').delete().eq('id', id);
+  if (AState.classId === id) AState.classId = null;
+  adminSetup();
+}
+
+/* ---------- STUDENTS TAB ---------- */
+function genProfileCode(){
+  let c = '';
+  for (let i=0;i<10;i++) c += Math.floor(Math.random()*10);
+  return c;
+}
+async function adminStudents(){
+  if (!AState.classId) {
+    adminShell(`<div class="card"><div class="banner info">Select a class in the Setup tab first.</div></div>`, 'students');
+    return;
+  }
+  adminShell(`<div class="card"><p class="muted">Loading…</p></div>`, 'students');
+  const students = await fetchStudents(AState.classId);
+  const cls = (await sb.from('rs_classes').select('*').eq('id', AState.classId).maybeSingle()).data;
+  const body = `
+    <div class="card">
+      <div class="top"><h2>🧑‍🎓 Students — ${esc(cls?.name || '')}</h2><span class="pill gold">${students.length} student(s)</span></div>
+      <div class="grid2">
+        <div class="field"><label>Full name</label><input id="stName" placeholder="e.g. John Okafor"></div>
+        <div class="field"><label>Sex</label><select id="stSex"><option>Male</option><option>Female</option></select></div>
+        <div class="field"><label>Age</label><input id="stAge" type="number" min="1" placeholder="e.g. 12"></div>
+        <div class="field"><label>House</label><input id="stHouse" placeholder="e.g. Red House"></div>
+        <div class="field"><label>Parent's name</label><input id="stParent" placeholder="Parent/Guardian full name"></div>
+        <div class="field"><label>Password (for login)</label><input id="stPass" placeholder="Password you assign"></div>
+      </div>
+      <button class="btn" onclick="createStudent()">+ Add Student</button>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px;">All students</h3>
+      ${students.length === 0 ? `<p class="muted">No students yet.</p>` : `
+      <div style="overflow:auto;">
+      <table>
+        <thead><tr><th>Name</th><th>Sex</th><th>Age</th><th>House</th><th>Parent</th><th>Password</th><th>Profile Code</th><th></th></tr></thead>
+        <tbody>
+        ${students.map(s => `
+          <tr>
+            <td><strong>${esc(s.name)}</strong></td>
+            <td>${esc(s.sex||'—')}</td>
+            <td>${esc(s.age||'—')}</td>
+            <td>${esc(s.house||'—')}</td>
+            <td>${esc(s.parent_name||'—')}</td>
+            <td>${esc(s.password||'—')} <button class="btn sm outline" onclick="resetStudentPassword('${s.id}')">Reset</button></td>
+            <td><span class="pill">${esc(s.profile_code||'—')}</span> <button class="btn sm outline" onclick="regenProfileCode('${s.id}')">New</button></td>
+            <td><button class="btn sm danger" onclick="deleteStudent('${s.id}')">Delete</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>`}
+    </div>`;
+  adminShell(body, 'students');
+}
+async function createStudent(){
+  const name = $('stName').value.trim();
+  if (!name) return toast('Enter the student\'s name','error');
+  const password = $('stPass').value.trim() || Math.random().toString(36).slice(2,8);
+  const payload = {
+    class_id: AState.classId, name, sex: $('stSex').value, age: $('stAge').value ? parseInt($('stAge').value) : null,
+    house: $('stHouse').value.trim() || null, parent_name: $('stParent').value.trim() || null,
+    password, profile_code: genProfileCode()
+  };
+  const { error } = await sb.from('rs_students').insert(payload);
+  if (error) return toast(error.message,'error');
+  toast('Student added','success'); adminStudents();
+}
+async function resetStudentPassword(id){
+  const np = prompt('Enter new password for this student:');
+  if (!np) return;
+  await sb.from('rs_students').update({ password: np }).eq('id', id);
+  toast('Password updated','success'); adminStudents();
+}
+async function regenProfileCode(id){
+  if (!confirm('Generate a new profile code? The old one will stop working.')) return;
+  await sb.from('rs_students').update({ profile_code: genProfileCode() }).eq('id', id);
+  toast('New profile code generated','success'); adminStudents();
+}
+async function deleteStudent(id){
+  if (!confirm('Delete this student and all their scores?')) return;
+  await sb.from('rs_students').delete().eq('id', id);
+  adminStudents();
+}
+
+/* ---------- SUBJECTS TAB ---------- */
+async function adminSubjects(){
+  if (!AState.classId) {
+    adminShell(`<div class="card"><div class="banner info">Select a class in the Setup tab first.</div></div>`, 'subjects');
+    return;
+  }
+  adminShell(`<div class="card"><p class="muted">Loading…</p></div>`, 'subjects');
+  const subjects = await fetchSubjects(AState.classId);
+  const cls = (await sb.from('rs_classes').select('*').eq('id', AState.classId).maybeSingle()).data;
+  const body = `
+    <div class="card">
+      <div class="top"><h2>📚 Subjects — ${esc(cls?.name || '')}</h2></div>
+      <div class="flex">
+        <input id="newSubjectName" placeholder="e.g. Mathematics" style="flex:1;min-width:160px;">
+        <button class="btn" onclick="createSubject()">+ Add Subject</button>
+      </div>
+      <div style="margin-top:12px;">
+        ${subjects.length === 0 ? `<p class="muted">No subjects yet for this class.</p>` : subjects.map(s => `
+          <div class="list-item">
+            <span>${esc(s.name)}</span>
+            <button class="btn sm danger" onclick="deleteSubject('${s.id}')">Delete</button>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px;">📐 Assessment components (this term)</h3>
+      <p class="muted" style="margin-bottom:10px;">Test 1–4 (10 marks each) + Exam (60 marks) = 100 per subject. Edit max marks if needed.</p>
+      <div id="compArea"><p class="muted">Loading…</p></div>
+    </div>`;
+  adminShell(body, 'subjects');
+  const comps = AState.termId ? await fetchComponents(AState.termId) : [];
+  $('compArea').innerHTML = comps.length === 0 ? `<p class="muted">No components — select a term in Setup.</p>` : `
+    <div style="overflow:auto;"><table>
+      <thead><tr><th>Component</th><th>Max marks</th><th></th></tr></thead>
+      <tbody>${comps.map(c => `
+        <tr>
+          <td>${esc(c.name)}</td>
+          <td><input class="scoreInput" style="width:70px;" id="comp_${c.id}" value="${c.max_score}"></td>
+          <td><button class="btn sm outline" onclick="updateComponent('${c.id}')">Save</button></td>
+        </tr>`).join('')}</tbody>
+    </table></div>`;
+}
+async function createSubject(){
+  const name = $('newSubjectName').value.trim();
+  if (!name) return toast('Enter a subject name','error');
+  const { error } = await sb.from('rs_subjects').insert({ class_id: AState.classId, name });
+  if (error) return toast(error.message,'error');
+  toast('Subject added','success'); adminSubjects();
+}
+async function deleteSubject(id){
+  if (!confirm('Delete this subject and all its scores?')) return;
+  await sb.from('rs_subjects').delete().eq('id', id);
+  adminSubjects();
+}
+async function updateComponent(id){
+  const val = parseFloat($('comp_'+id).value);
+  if (isNaN(val) || val <= 0) return toast('Enter a valid number','error');
+  await sb.from('rs_components').update({ max_score: val }).eq('id', id);
+  toast('Component updated','success'); adminSubjects();
+}
+
+/* ---------- SCORE ENTRY TAB ---------- */
+async function adminScores(subjectId){
+  if (!AState.classId || !AState.termId) {
+    adminShell(`<div class="card"><div class="banner info">Select a class in the Setup tab first.</div></div>`, 'scores');
+    return;
+  }
+  adminShell(`<div class="card"><p class="muted">Loading…</p></div>`, 'scores');
+  const [subjects, students, comps] = await Promise.all([
+    fetchSubjects(AState.classId), fetchStudents(AState.classId), fetchComponents(AState.termId)
+  ]);
+  if (!subjectId && subjects[0]) subjectId = subjects[0].id;
+  let scoresMap = {};
+  if (subjectId && students.length && comps.length) {
+    const { data } = await sb.from('rs_scores').select('*').eq('subject_id', subjectId).in('student_id', students.map(s=>s.id));
+    (data||[]).forEach(sc => { scoresMap[sc.student_id+'_'+sc.component_id] = sc; });
+  }
+  const body = `
+    <div class="card">
+      <div class="top"><h2>✍️ Score Entry</h2></div>
+      <div class="field"><label>Subject</label>
+        <select id="scoreSubjectSel" onchange="adminScores(this.value)">
+          ${subjects.length===0 ? `<option value="">No subjects yet</option>` : subjects.map(s => `<option value="${s.id}" ${s.id===subjectId?'selected':''}>${esc(s.name)}</option>`).join('')}
+        </select>
+      </div>
+      ${(!subjectId || students.length===0 || comps.length===0) ? `<p class="muted">Add subjects, students, and components first.</p>` : `
+      <div style="overflow:auto;">
+      <table>
+        <thead><tr><th>Student</th>${comps.map(c=>`<th>${esc(c.name)}<br><span class="muted" style="text-transform:none;">/${c.max_score}</span></th>`).join('')}<th>Total</th></tr></thead>
+        <tbody>
+        ${students.map(st => {
+          let total = 0, allFilled = true;
+          const cells = comps.map(c => {
+            const rec = scoresMap[st.id+'_'+c.id];
+            const val = rec ? rec.score : '';
+            if (val === '' || val == null) allFilled = false; else total += Number(val);
+            return `<td><input class="scoreInput" data-student="${st.id}" data-comp="${c.id}" data-max="${c.max_score}" value="${val}"></td>`;
+          }).join('');
+          return `<tr><td><strong>${esc(st.name)}</strong></td>${cells}<td><strong>${allFilled ? total.toFixed(1) : '—'}</strong></td></tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+      </div>
+      <button class="btn" style="margin-top:14px;" onclick="saveAllScores('${subjectId}')">💾 Save All Scores</button>
+      <div id="scoreSaveMsg"></div>`}
+    </div>`;
+  adminShell(body, 'scores');
+}
+async function saveAllScores(subjectId){
+  const inputs = document.querySelectorAll('.scoreInput[data-student]');
+  const msg = $('scoreSaveMsg');
+  msg.innerHTML = `<div class="banner info">Saving…</div>`;
+  const rows = [];
+  for (const inp of inputs) {
+    const raw = inp.value.trim();
+    if (raw === '') continue;
+    const max = parseFloat(inp.dataset.max);
+    const val = parseFloat(raw);
+    if (isNaN(val) || val < 0 || val > max) { msg.innerHTML = `<div class="banner error">Invalid score ${esc(raw)} (max ${max}). Fix and retry.</div>`; return; }
+    rows.push({ student_id: inp.dataset.student, subject_id: subjectId, component_id: inp.dataset.comp, score: val, source: 'manual' });
+  }
+  if (rows.length === 0) { msg.innerHTML = `<div class="banner info">Nothing to save.</div>`; return; }
+  const { error } = await sb.from('rs_scores').upsert(rows, { onConflict: 'student_id,subject_id,component_id' });
+  if (error) { msg.innerHTML = `<div class="banner error">${esc(error.message)}</div>`; return; }
+  toast('Scores saved','success');
+  adminScores(subjectId);
+}
+
+/* ---------- BROADSHEET (class + term scoped) ---------- */
+async function computeBroadsheet(classId, termId){
+  const [subjects, students, comps] = await Promise.all([
+    fetchSubjects(classId), fetchStudents(classId), fetchComponents(termId)
+  ]);
+  const maxPerSubject = comps.reduce((sum,c) => sum + Number(c.max_score), 0) || 100;
+  let scores = [];
+  if (subjects.length && students.length) {
+    const { data } = await sb.from('rs_scores').select('*')
+      .in('subject_id', subjects.map(s=>s.id)).in('student_id', students.map(s=>s.id));
+    scores = data || [];
+  }
+  const scale = (await sb.from('rs_grading_scale').select('*').order('sort_order')).data || [];
+  const gradeOf = total => scale.find(r => total >= r.min_score && total <= r.max_score) || { grade:'—', remark:'—' };
+
+  const caComponents = comps.slice(0, -1);
+  const examComponent = comps[comps.length - 1];
+  const caMax = caComponents.reduce((s,c)=>s+Number(c.max_score),0);
+  const examMax = examComponent ? Number(examComponent.max_score) : 0;
+
+  // per-student per-subject totals
+  const perStudent = students.map(st => {
+    const subjectTotals = subjects.map(sub => {
+      const relevant = scores.filter(sc => sc.student_id === st.id && sc.subject_id === sub.id);
+      const filled = relevant.length === comps.length && relevant.every(r => r.score != null);
+      const total = filled ? relevant.reduce((s,r) => s + Number(r.score), 0) : null;
+      const compVals = comps.map(c => {
+        const rec = relevant.find(r => r.component_id === c.id);
+        return rec && rec.score != null ? Number(rec.score) : null;
+      });
+      const caTotal = filled ? compVals.slice(0,-1).reduce((s,v)=>s+v,0) : null;
+      const examScore = filled ? compVals[compVals.length-1] : null;
+      return { subjectId: sub.id, subjectName: sub.name, total, grade: total!=null ? gradeOf(total) : null, compVals, caTotal, examScore };
+    });
+    const complete = subjects.length > 0 && subjectTotals.every(s => s.total != null);
+    const overallTotal = complete ? subjectTotals.reduce((s,x)=>s+x.total,0) : null;
+    const average = complete ? overallTotal / subjects.length : null;
+    return { student: st, subjectTotals, complete, overallTotal, average };
   });
 
-  if(mode==='admin'){
-    el('authbox').innerHTML=`
-      <div class="grid">
-        <div class="field"><label>Admin email</label>
-          <input id="admin_email" type="email" value="ogonorprincebright@gmail.com" autocomplete="username">
+  // subject position (rank within class, per subject)
+  subjects.forEach((sub, idx) => {
+    const arr = perStudent.map(p => ({ ref: p, val: p.subjectTotals[idx].total }));
+    const ranks = competitionRank(arr.map(a=>({total:a.val})), 'total');
+    arr.forEach((a,i) => { a.ref.subjectTotals[idx].position = ranks[i]; });
+  });
+  // overall position (rank within class)
+  const overallRanks = competitionRank(perStudent.map(p=>({total:p.overallTotal})), 'total');
+  perStudent.forEach((p,i) => { p.overallPosition = overallRanks[i]; });
+
+  return { subjects, students, comps, maxPerSubject, caMax, examMax, perStudent };
+}
+
+async function adminBroadsheet(){
+  if (!AState.classId || !AState.termId) {
+    adminShell(`<div class="card"><div class="banner info">Select a class in the Setup tab first.</div></div>`, 'broadsheet');
+    return;
+  }
+  adminShell(`<div class="card"><p class="muted">Computing broadsheet…</p></div>`, 'broadsheet');
+  const cls = (await sb.from('rs_classes').select('*').eq('id', AState.classId).maybeSingle()).data;
+  const { subjects, perStudent, maxPerSubject } = await computeBroadsheet(AState.classId, AState.termId);
+  const classMax = maxPerSubject * subjects.length;
+
+  const body = `
+    <div class="card">
+      <div class="top"><h2>📊 Broadsheet — ${esc(cls?.name||'')}</h2><span class="pill gold">${perStudent.length} student(s)</span></div>
+      <p class="muted">Ranking is scoped to this class only. A student's result is complete only when every subject has all components filled.</p>
+      ${subjects.length===0 || perStudent.length===0 ? `<p class="muted">Add subjects and students first.</p>` : `
+      <div style="overflow:auto;">
+      <table>
+        <thead><tr><th>Student</th>${subjects.map(s=>`<th>${esc(s.name)}</th>`).join('')}<th>Total</th><th>Average</th><th>Position</th><th></th></tr></thead>
+        <tbody>
+        ${perStudent.sort((a,b) => (a.overallPosition||999)-(b.overallPosition||999)).map(p => `
+          <tr>
+            <td><strong>${esc(p.student.name)}</strong></td>
+            ${p.subjectTotals.map(s => `<td>${s.total!=null ? '<strong>'+s.total.toFixed(1)+'</strong> ('+s.grade.grade+') — <strong>'+ordinal(s.position)+'</strong>' : '—'}</td>`).join('')}
+            <td><strong>${p.overallTotal!=null ? p.overallTotal.toFixed(1)+'/'+classMax : '—'}</strong></td>
+            <td><strong>${p.average!=null ? p.average.toFixed(1)+'%' : '—'}</strong></td>
+            <td><strong>${p.overallPosition ? ordinal(p.overallPosition) : (p.complete ? '—' : '<span class="pill red">Incomplete</span>')}</strong></td>
+            <td><button class="btn sm outline" onclick="adminPrintResult('${p.student.id}')">🖨️ Print</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>`}
+    </div>`;
+  adminShell(body, 'broadsheet');
+}
+async function adminPrintResult(studentId){ await showPrintPage(studentId, AState.classId, AState.termId, 'adminBroadsheet'); }
+
+/* ---------- SHARED: PRINT / VIEW RESULT SHEET ---------- */
+async function fetchSettingsMap(){
+  const { data } = await sb.from('rs_settings').select('*');
+  const map = {};
+  (data||[]).forEach(r => { map[r.key] = r.value; });
+  return map;
+}
+async function showPrintPage(studentId, classId, termId, backFnName){
+  app.innerHTML = `<div class="content"><p class="muted">Preparing result sheet…</p></div>`;
+  const { subjects, comps, maxPerSubject, caMax, examMax, perStudent } = await computeBroadsheet(classId, termId);
+  const p = perStudent.find(x => x.student.id === studentId);
+  if (!p) { app.innerHTML = `<div class="content"><div class="banner error">Student not found.</div><button class="btn" onclick="${backFnName}()">Back</button></div>`; return; }
+  const cls = (await sb.from('rs_classes').select('*').eq('id', classId).maybeSingle()).data;
+  const term = (await sb.from('rs_terms').select('*').eq('id', termId).maybeSingle()).data;
+  const session = term ? (await sb.from('rs_sessions').select('*').eq('id', term.session_id).maybeSingle()).data : null;
+  const settings = await fetchSettingsMap();
+  const classMax = maxPerSubject * subjects.length;
+  const st = p.student;
+
+  const rowsHtml = subjects.map((sub, i) => {
+    const sTot = p.subjectTotals[i];
+    return `<tr>
+      <td>${i+1}</td><td style="text-align:left;">${esc(sub.name)}</td>
+      ${comps.map((c,ci) => `<td>${sTot.compVals[ci] != null ? sTot.compVals[ci] : '—'}</td>`).join('')}
+      <td><strong>${sTot.caTotal!=null ? sTot.caTotal.toFixed(1) : '—'}</strong></td>
+      <td><strong>${sTot.total!=null ? sTot.total.toFixed(1) : '—'}</strong></td>
+      <td>${sTot.grade ? sTot.grade.grade : '—'}</td>
+      <td><strong>${sTot.position ? ordinal(sTot.position) : '—'}</strong></td>
+    </tr>`;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="no-print" style="padding:14px;display:flex;gap:10px;justify-content:center;background:var(--surface);border-bottom:1px solid var(--border);">
+      <button class="btn outline" onclick="${backFnName}()">← Back</button>
+      <button class="btn gold" onclick="window.print()">🖨️ Print</button>
+    </div>
+    <div style="padding:20px 10px;">
+      <div id="printArea" class="resultSheet">
+        <h1>${esc(settings.school_name || 'DE-TRINITY MONTESSORI EDUCATION CENTER')}</h1>
+        <p class="sub">${esc(settings.school_address || 'Off Odiemenyi Road')}</p>
+        <p class="sub" style="font-weight:800;letter-spacing:.05em;">TERMLY ACADEMIC REPORT SHEET</p>
+        <div class="infoGrid">
+          <div><strong>Name:</strong> ${esc(st.name)}</div>
+          <div><strong>Class:</strong> ${esc(cls?.name||'')}</div>
+          <div><strong>Sex:</strong> ${esc(st.sex||'—')}</div>
+          <div><strong>Age:</strong> ${esc(st.age||'—')}</div>
+          <div><strong>Parent:</strong> ${esc(st.parent_name||'—')}</div>
+          <div><strong>House:</strong> ${esc(st.house||'—')}</div>
+          <div><strong>Term:</strong> ${esc(term?.name||'')}</div>
+          <div><strong>Session:</strong> ${esc(session?.name||'')}</div>
         </div>
-        <div class="field"><label>Admin password</label>
-          <input id="admin_pass" type="password" autocomplete="current-password">
+        <table style="width:100%;">
+          <thead><tr>
+            <th>S/N</th><th style="text-align:left;">Subject</th>
+            ${comps.map(c=>`<th>${esc(c.name)}<br>/${c.max_score}</th>`).join('')}
+            <th>CA Total<br>/${caMax}</th><th>Total<br>/100</th><th>Grade</th><th>Pos.</th>
+          </tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div class="infoGrid" style="margin-top:14px;">
+          <div>Total: <strong>${p.overallTotal!=null ? p.overallTotal.toFixed(1) : '—'} out of ${classMax}</strong></div>
+          <div>Average: <strong>${p.average!=null ? p.average.toFixed(1)+'%' : '—'}</strong></div>
+          <div>Position: <strong>${p.overallPosition ? ordinal(p.overallPosition) + ' in class' : (p.complete ? '—' : 'Incomplete')}</strong></div>
+          <div>Fees payable: <strong>${esc(settings.fees_payable||'—')}</strong></div>
         </div>
-        <button class="btn primary" onclick="adminLogin()">Login as Admin</button>
-      </div>`;
-  }else{
-    el('authbox').innerHTML=`
-      <div class="grid">
-        <div class="field"><label>Student name</label>
-          <input id="student_name" type="text" placeholder="Enter your full name">
+        <div style="margin-top:10px;"><strong>Remark:</strong> ${esc(overallRemark(p.average))}</div>
+        <div class="grid2" style="margin-top:22px;">
+          <div class="sigline">Class Teacher: ${esc(settings.class_teacher_name||'')} — Sign: ______________</div>
+          <div class="sigline">Headmistress: ${esc(settings.headmistress_name||'')} — Sign: ______________</div>
+          <div class="sigline">Proprietress: ${esc(settings.proprietress_name||'')} — Sign: ______________</div>
+          <div class="sigline">School reopens on: ${esc(settings.reopening_date||'—')}</div>
         </div>
-        <div class="field"><label>Password</label>
-          <input id="student_pass" type="password" autocomplete="current-password">
+        <div class="stampBox">School Stamp</div>
+      </div>
+    </div>`;
+}
+function overallRemark(avg){
+  if (avg == null) return '—';
+  if (avg >= 75) return 'Excellent performance. Keep it up!';
+  if (avg >= 60) return 'Very good result.';
+  if (avg >= 50) return 'Good, but there is room for improvement.';
+  if (avg >= 40) return 'Fair. More effort is needed.';
+  return 'Poor performance. Needs serious improvement.';
+}
+
+/* ============================================================
+   MOCKS (admin: schedule; student: take; auto-fills a score slot)
+   ============================================================ */
+window._mockDraftQuestions = [];
+async function adminMocks(){
+  if (!AState.classId || !AState.termId) {
+    adminShell(`<div class="card"><div class="banner info">Select a class in the Setup tab first.</div></div>`, 'mocks');
+    return;
+  }
+  adminShell(`<div class="card"><p class="muted">Loading…</p></div>`, 'mocks');
+  const [subjects, comps, mocks] = await Promise.all([
+    fetchSubjects(AState.classId), fetchComponents(AState.termId),
+    sb.from('rs_mocks').select('*').eq('class_id', AState.classId).order('created_at',{ascending:false}).then(r=>r.data||[])
+  ]);
+  const body = `
+    <div class="card">
+      <div class="top"><h2>📝 Schedule a Mock</h2></div>
+      <div class="grid2">
+        <div class="field"><label>Title</label><input id="mockTitle" placeholder="e.g. Mock Test — Mathematics"></div>
+        <div class="field"><label>Subject</label><select id="mockSubject">${subjects.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>Fills score slot</label><select id="mockComponent">${comps.map(c=>`<option value="${c.id}">${esc(c.name)} (/${c.max_score})</option>`).join('')}</select></div>
+        <div class="field"><label>Duration (minutes)</label><input id="mockDuration" type="number" value="30"></div>
+        <div class="field"><label>Opens at</label><input id="mockStart" type="datetime-local"></div>
+        <div class="field"><label>Closes at</label><input id="mockEnd" type="datetime-local"></div>
+      </div>
+      <h3 style="margin:14px 0 8px;">Questions</h3>
+      <div id="mockQuestionsArea"></div>
+      <button class="btn sm outline" onclick="addMockQuestionDraft()">+ Add Question</button>
+      <div style="margin-top:14px;"><button class="btn" onclick="createMock()">📅 Schedule Mock</button></div>
+      <div id="mockCreateMsg"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px;">Scheduled mocks for this class</h3>
+      ${mocks.length===0 ? `<p class="muted">None yet.</p>` : mocks.map(m => `
+        <div class="list-item" style="align-items:flex-start;">
+          <div>
+            <strong>${esc(m.title)}</strong><br>
+            <span class="muted">${fmtDateTime(m.start_time)} → ${fmtDateTime(m.end_time)} · ${m.duration_minutes} min</span>
+          </div>
+          <div class="flex">
+            <button class="btn sm outline" onclick="viewMockAttempts('${m.id}')">Attempts</button>
+            <button class="btn sm danger" onclick="deleteMock('${m.id}')">Delete</button>
+          </div>
+        </div>`).join('')}
+      <div id="mockAttemptsArea"></div>
+    </div>`;
+  adminShell(body, 'mocks');
+  window._mockDraftQuestions = [];
+  renderMockQuestionDrafts();
+}
+function addMockQuestionDraft(){
+  window._mockDraftQuestions.push({ id: uid(), q:'', options:['','','',''], correct:0 });
+  renderMockQuestionDrafts();
+}
+function renderMockQuestionDrafts(){
+  const area = $('mockQuestionsArea');
+  if (!area) return;
+  area.innerHTML = window._mockDraftQuestions.map((q,i) => `
+    <div class="qbox">
+      <div class="field"><label>Question ${i+1}</label><input value="${esc(q.q)}" onchange="updateDraftQ('${q.id}','q',this.value)"></div>
+      <div class="grid2">
+        ${q.options.map((opt,oi) => `
+          <div class="field">
+            <label><input type="radio" name="correct_${q.id}" ${q.correct===oi?'checked':''} onchange="updateDraftQ('${q.id}','correct',${oi})"> Option ${oi+1} ${q.correct===oi?'(correct)':''}</label>
+            <input value="${esc(opt)}" onchange="updateDraftOpt('${q.id}',${oi},this.value)">
+          </div>`).join('')}
+      </div>
+      <button class="btn sm danger" onclick="removeDraftQ('${q.id}')">Remove question</button>
+    </div>`).join('') || `<p class="muted">No questions added yet.</p>`;
+}
+function updateDraftQ(id, field, val){ const q = window._mockDraftQuestions.find(x=>x.id===id); if (q) q[field] = val; }
+function updateDraftOpt(id, idx, val){ const q = window._mockDraftQuestions.find(x=>x.id===id); if (q) q.options[idx] = val; }
+function removeDraftQ(id){ window._mockDraftQuestions = window._mockDraftQuestions.filter(x=>x.id!==id); renderMockQuestionDrafts(); }
+async function createMock(){
+  const msg = $('mockCreateMsg');
+  const title = $('mockTitle').value.trim();
+  const start = $('mockStart').value, end = $('mockEnd').value;
+  if (!title || !start || !end) { msg.innerHTML = `<div class="banner error">Fill title, opens-at and closes-at.</div>`; return; }
+  const qs = window._mockDraftQuestions.filter(q => q.q.trim() && q.options.every(o=>o.trim()));
+  if (qs.length === 0) { msg.innerHTML = `<div class="banner error">Add at least one complete question.</div>`; return; }
+  const payload = {
+    class_id: AState.classId, subject_id: $('mockSubject').value, component_id: $('mockComponent').value,
+    title, questions: qs, start_time: new Date(start).toISOString(), end_time: new Date(end).toISOString(),
+    duration_minutes: parseInt($('mockDuration').value) || 30
+  };
+  const { error } = await sb.from('rs_mocks').insert(payload);
+  if (error) { msg.innerHTML = `<div class="banner error">${esc(error.message)}</div>`; return; }
+  toast('Mock scheduled','success'); adminMocks();
+}
+async function deleteMock(id){
+  if (!confirm('Delete this mock and its attempts?')) return;
+  await sb.from('rs_mocks').delete().eq('id', id);
+  adminMocks();
+}
+async function viewMockAttempts(mockId){
+  const area = $('mockAttemptsArea');
+  area.innerHTML = `<p class="muted">Loading attempts…</p>`;
+  const { data } = await sb.from('rs_mock_attempts').select('*, rs_students(name)').eq('mock_id', mockId);
+  area.innerHTML = `
+    <div class="card" style="margin-top:10px;background:var(--surface-2);">
+      <h3>Attempts</h3>
+      ${(!data || data.length===0) ? `<p class="muted">No attempts yet.</p>` : `
+      <table><thead><tr><th>Student</th><th>Score</th><th>Completed</th></tr></thead>
+      <tbody>${data.map(a=>`<tr><td>${esc(a.rs_students?.name||'—')}</td><td>${a.score}</td><td>${fmtDateTime(a.completed_at)}</td></tr>`).join('')}</tbody></table>`}
+    </div>`;
+}
+
+/* ---------- STUDENT: take a mock ---------- */
+async function studentAvailableMocks(classId){
+  const { data } = await sb.from('rs_mocks').select('*').eq('class_id', classId);
+  const now = new Date();
+  return (data||[]).filter(m => new Date(m.start_time) <= now && now <= new Date(m.end_time));
+}
+async function studentTakeMock(mockId){
+  const s = loadSession();
+  const { data: mock } = await sb.from('rs_mocks').select('*').eq('id', mockId).maybeSingle();
+  if (!mock) { toast('Mock not found','error'); return; }
+  const { data: existing } = await sb.from('rs_mock_attempts').select('*').eq('mock_id', mockId).eq('student_id', s.id).maybeSingle();
+  if (existing) { toast('You already attempted this mock.','error'); studentHome(); return; }
+  window._activeMock = mock;
+  window._mockAnswers = new Array(mock.questions.length).fill(null);
+  renderMockQuestion(0);
+}
+function renderMockQuestion(idx){
+  const mock = window._activeMock;
+  const q = mock.questions[idx];
+  app.innerHTML = `
+    <div class="content" style="max-width:600px;">
+      <div class="card">
+        <div class="top"><h2>📝 ${esc(mock.title)}</h2><span class="pill gold">Q${idx+1}/${mock.questions.length}</span></div>
+        <h3 style="margin-bottom:12px;">${esc(q.q)}</h3>
+        ${q.options.map((opt,oi) => `
+          <label class="list-item" style="cursor:pointer;">
+            <span><input type="radio" name="mockAns" ${window._mockAnswers[idx]===oi?'checked':''} onchange="window._mockAnswers[${idx}]=${oi}"> ${esc(opt)}</span>
+          </label>`).join('')}
+        <div class="flex" style="margin-top:16px;justify-content:space-between;">
+          ${idx>0 ? `<button class="btn outline" onclick="renderMockQuestion(${idx-1})">← Previous</button>` : `<span></span>`}
+          ${idx < mock.questions.length-1
+            ? `<button class="btn" onclick="renderMockQuestion(${idx+1})">Next →</button>`
+            : `<button class="btn gold" onclick="submitMock()">✅ Submit Mock</button>`}
         </div>
-        <button class="btn primary" onclick="studentLogin()">Login as Student</button>
-        <div class="notice small">Your administrator will provide your password. Students only see published mocks and released results.</div>
+      </div>
+    </div>`;
+}
+async function submitMock(){
+  const mock = window._activeMock;
+  const s = loadSession();
+  const answers = window._mockAnswers;
+  let correct = 0;
+  mock.questions.forEach((q,i) => { if (answers[i] === q.correct) correct++; });
+  const pct = correct / mock.questions.length;
+  const { data: comp } = await sb.from('rs_components').select('*').eq('id', mock.component_id).maybeSingle();
+  const scaledScore = comp ? Math.round(pct * comp.max_score * 10) / 10 : correct;
+  const { error: e1 } = await sb.from('rs_mock_attempts').insert({ mock_id: mock.id, student_id: s.id, score: scaledScore, total_questions: mock.questions.length });
+  if (e1) { toast(e1.message,'error'); return; }
+  await sb.from('rs_scores').upsert({
+    student_id: s.id, subject_id: mock.subject_id, component_id: mock.component_id,
+    score: scaledScore, source: 'mock', mock_id: mock.id
+  }, { onConflict: 'student_id,subject_id,component_id' });
+  toast(`Mock submitted! Score auto-filled into your record.`, 'success');
+  studentHome();
+}
+
+/* ============================================================
+   PUBLISH TAB
+   ============================================================ */
+async function adminPublish(){
+  if (!AState.classId || !AState.termId) {
+    adminShell(`<div class="card"><div class="banner info">Select a class in the Setup tab first.</div></div>`, 'publish');
+    return;
+  }
+  const cls = (await sb.from('rs_classes').select('*').eq('id', AState.classId).maybeSingle()).data;
+  const term = (await sb.from('rs_terms').select('*').eq('id', AState.termId).maybeSingle()).data;
+  const { data: pub } = await sb.from('rs_publish').select('*').eq('class_id', AState.classId).eq('term_id', AState.termId).maybeSingle();
+  const isPublished = pub?.published || false;
+  const body = `
+    <div class="card">
+      <div class="top"><h2>📢 Publish Results</h2></div>
+      <p class="muted">Students in <strong>${esc(cls?.name||'')}</strong> (${esc(term?.name||'')}) will only see their result after you publish. Before that, they only see mocks assigned to them.</p>
+      <div class="banner ${isPublished?'success':'info'}" style="margin:14px 0;">
+        Status: ${isPublished ? `✅ Published${pub.published_at ? ' on '+fmtDateTime(pub.published_at) : ''}` : '🔒 Not published yet'}
+      </div>
+      ${isPublished
+        ? `<button class="btn danger" onclick="togglePublish(false)">Unpublish</button>`
+        : `<button class="btn gold" onclick="togglePublish(true)">📢 Publish Result Now</button>`}
+    </div>`;
+  adminShell(body, 'publish');
+}
+async function togglePublish(pub){
+  const payload = { class_id: AState.classId, term_id: AState.termId, published: pub, published_at: pub ? new Date().toISOString() : null };
+  const { error } = await sb.from('rs_publish').upsert(payload, { onConflict: 'class_id,term_id' });
+  if (error) return toast(error.message,'error');
+  toast(pub ? 'Result published!' : 'Result unpublished', 'success');
+  adminPublish();
+}
+
+/* ============================================================
+   LIFETIME RESULT (admin: search a student's full history)
+   ============================================================ */
+async function adminLifetime(query){
+  adminShell(`
+    <div class="card">
+      <div class="top"><h2>📁 Student Lifetime Result</h2></div>
+      <div class="flex">
+        <input id="lifetimeSearch" placeholder="Type student name…" value="${esc(query||'')}" style="flex:1;min-width:180px;">
+        <button class="btn" onclick="adminLifetime($('lifetimeSearch').value)">Search</button>
+      </div>
+      <div id="lifetimeResults" style="margin-top:14px;">${query ? '<p class="muted">Searching…</p>' : '<p class="muted">Search by name to see every term/session result a student has ever had.</p>'}</div>
+    </div>`, 'lifetime');
+  if (!query) return;
+  const { data: students } = await sb.from('rs_students').select('*, rs_classes(*, rs_terms(*, rs_sessions(*)))').ilike('name', `%${query}%`);
+  const area = $('lifetimeResults');
+  if (!students || students.length === 0) { area.innerHTML = `<p class="muted">No student found matching "${esc(query)}".</p>`; return; }
+  let html = '';
+  for (const st of students) {
+    const term = st.rs_classes?.rs_terms, session = term?.rs_sessions;
+    html += `
+      <div class="list-item">
+        <span><strong>${esc(st.name)}</strong> — ${esc(st.rs_classes?.name||'')} · ${esc(term?.name||'')} · ${esc(session?.name||'')}</span>
+        <button class="btn sm outline" onclick="showPrintPage('${st.id}','${st.class_id}','${term?.id}','adminLifetime')">View / Print</button>
       </div>`;
   }
+  area.innerHTML = html;
 }
 
-async function adminLogin(){
-  try{
-    const email=el('admin_email').value.trim();
-    const password=el('admin_pass').value;
-    if(email!=='ogonorprincebright@gmail.com')
-      throw Error('Invalid admin email.');
-    const {error}=await sb.auth.signInWithPassword({email,password});
-    if(error)throw error;
-    location.reload();
-  }catch(e){toast(e.message,false)}
+/* ============================================================
+   SETTINGS TAB
+   ============================================================ */
+async function adminSettings(){
+  const s = await fetchSettingsMap();
+  const body = `
+    <div class="card">
+      <div class="top"><h2>⚙️ School Settings</h2></div>
+      <p class="muted">These appear on every printed result sheet.</p>
+      <div class="field"><label>School name</label><input id="setSchoolName" value="${esc(s.school_name||'DE-TRINITY MONTESSORI EDUCATION CENTER')}"></div>
+      <div class="field"><label>School address</label><input id="setSchoolAddress" value="${esc(s.school_address||'Off Odiemenyi Road')}"></div>
+      <div class="field"><label>Class Teacher's name</label><input id="setTeacher" value="${esc(s.class_teacher_name||'')}"></div>
+      <div class="field"><label>Headmistress's name</label><input id="setHeadmistress" value="${esc(s.headmistress_name||'')}"></div>
+      <div class="field"><label>Proprietress's name</label><input id="setProprietress" value="${esc(s.proprietress_name||'')}"></div>
+      <div class="field"><label>Fees payable (next term)</label><input id="setFees" value="${esc(s.fees_payable||'')}"></div>
+      <div class="field"><label>School reopens on</label><input id="setReopen" value="${esc(s.reopening_date||'')}" placeholder="e.g. 8th September 2026"></div>
+      <button class="btn" onclick="saveSettings()">💾 Save Settings</button>
+      <div id="settingsMsg"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px;">📐 WAEC Grading Scale (in use)</h3>
+      <table><thead><tr><th>Grade</th><th>Range</th><th>Remark</th></tr></thead>
+      <tbody>
+        <tr><td>A1</td><td>75–100</td><td>Excellent</td></tr>
+        <tr><td>B2</td><td>70–74</td><td>Very Good</td></tr>
+        <tr><td>B3</td><td>65–69</td><td>Good</td></tr>
+        <tr><td>C4</td><td>60–64</td><td>Credit</td></tr>
+        <tr><td>C5</td><td>55–59</td><td>Credit</td></tr>
+        <tr><td>C6</td><td>50–54</td><td>Credit</td></tr>
+        <tr><td>D7</td><td>45–49</td><td>Pass</td></tr>
+        <tr><td>E8</td><td>40–44</td><td>Pass</td></tr>
+        <tr><td>F9</td><td>Below 40</td><td>Fail</td></tr>
+      </tbody></table>
+    </div>`;
+  adminShell(body, 'settings');
 }
-
-async function studentLogin(){
-  try{
-    const name=el('student_name').value.trim();
-    const password=el('student_pass').value;
-    if(!name||!password)throw Error('Enter your name and password.');
-
-    // Student credentials are managed in school_profiles.
-    // The password is checked against the profile's stored password field.
-    const profiles=await q('school_profiles','*',[{op:'ilike',col:'name',val:name}]);
-    const p=profiles.find(x=>String(x.name||'').toLowerCase()===name.toLowerCase());
-
-    if(!p)throw Error('Student not found.');
-    if(p.role==='admin')throw Error('Use the Admin Login.');
-    if(String(p.password||'')!==password)throw Error('Incorrect password.');
-
-    A.user={id:p.id,email:p.email||null};
-    A.profile=p;
-    student();
-  }catch(e){toast(e.message,false)}
-}
-
-function firstProfile(){
-document.getElementById('root').innerHTML=`<div class="login"><div class="loginbox card"><h2>Student profile</h2><p class="muted">Fill this once. Admins can later complete or edit the school details.</p>
-${profileForm()}
-<button class="btn primary" onclick="saveFirstProfile()">Save profile</button></div></div>`}
-function profileForm(p={}){
-return `<div class="grid g2">
-<div class="field"><label>Full name *</label><input id="f_name" value="${esc(p.name)}" oninput="updateStudentLivePreview()"></div>
-<div class="field"><label>Class *</label><input id="f_class" value="${esc(p.class_name)}" placeholder="JSS 1" oninput="updateStudentLivePreview()"></div>
-<div class="field"><label>Sex *</label><select id="f_sex" onchange="updateStudentLivePreview()"><option value="">Select</option><option ${p.sex==='Male'?'selected':''}>Male</option><option ${p.sex==='Female'?'selected':''}>Female</option></select></div>
-<div class="field"><label>Age *</label><input id="f_age" type="number" value="${esc(p.age)}" oninput="updateStudentLivePreview()"></div>
-<div class="field"><label>Parent/Guardian name *</label><input id="f_parent" value="${esc(p.parent_name)}" oninput="updateStudentLivePreview()"></div>
-<div class="field"><label>House</label><input id="f_house" value="${esc(p.house)}" oninput="updateStudentLivePreview()"></div>
-<div class="field"><label>Class teacher *</label><input id="f_teacher" value="${esc(p.class_teacher)}" oninput="updateStudentLivePreview()"></div>
-<div class="field"><label>Headmistress *</label><input id="f_headmistress" value="${esc(p.headmistress)}" oninput="updateStudentLivePreview()"></div>
-<div class="field"><label>Headmaster/Principal *</label><input id="f_headmaster" value="${esc(p.headmaster)}" oninput="updateStudentLivePreview()"></div>
-<div class="field"><label>Fees payable</label><input id="f_fees" type="number" value="${esc(p.fees_payable)}" oninput="updateStudentLivePreview()"></div>
-<div class="field"><label>Student ID / admission no. *</label><input id="f_adm" value="${esc(p.admission_no)}" oninput="updateStudentLivePreview()"></div><div class="field"><label>Student password</label><input id="f_password" type="text" value="${esc(p.password)}" placeholder="Optional student login password"></div>
-</div>
-<div class="subject-picker" style="margin-top:12px"><b>Subjects this student will offer *</b><div class="preview-note">Select only the subjects this particular student takes. These are the subjects that will appear on the student's full result.</div><div id="studentSubjectsBox" class="subject-list"><span class="muted small">Loading subjects…</span></div></div>
-<div id="studentProfileCheck"></div>
-<div class="live-preview" style="margin-top:12px"><b>Live result header preview</b><div class="preview-note">This updates as you type, so you can confirm the student's name and other report details before saving.</div><div id="studentLivePreview" style="margin-top:10px"></div></div>`}
-function studentFormValues(){return {name:el('f_name')?.value.trim()||'',class_name:el('f_class')?.value.trim()||'',sex:el('f_sex')?.value||'',age:el('f_age')?.value||'',parent_name:el('f_parent')?.value.trim()||'',house:el('f_house')?.value.trim()||'',class_teacher:el('f_teacher')?.value.trim()||'',headmistress:el('f_headmistress')?.value.trim()||'',headmaster:el('f_headmaster')?.value.trim()||'',fees_payable:el('f_fees')?.value||'',admission_no:el('f_adm')?.value.trim()||'',password:el('f_password')?.value||''}}
-function profileCompleteness(p){let required=[['Full name','name'],['Class','class_name'],['Sex','sex'],['Age','age'],['Parent/Guardian name','parent_name'],['Class teacher','class_teacher'],['Headmistress','headmistress'],['Headmaster/Principal','headmaster'],['Student ID / admission no.','admission_no']];let missing=required.filter(x=>!String(p[x[1]]??'').trim()).map(x=>x[0]);return {missing,done:required.length-missing.length,total:required.length,pct:Math.round((required.length-missing.length)/required.length*100)}}
-function updateStudentLivePreview(){
-let p=studentFormValues(),c=profileCompleteness(p),box=el('studentProfileCheck'),pv=el('studentLivePreview');
-if(!box||!pv)return;
-let selected=[...document.querySelectorAll('input[data-student-subject]:checked')];
-let subjectNames=selected.map(x=>x.parentElement?.querySelector('span')?.textContent?.trim()||'Subject');
-let subjectNote=selected.length?`<div style="margin-top:5px">Subjects selected: <b>${selected.length}</b> — ${esc(subjectNames.join(', '))}</div>`:'<div style="margin-top:5px;color:#b42318"><b>No subjects selected yet.</b></div>';
-box.innerHTML=`<div class="profile-check ${c.missing.length||!selected.length?'warn':'good'}"><b>Profile completeness: ${c.pct}%</b><div class="profile-progress"><span style="width:${c.pct}%"></span></div><div>${c.missing.length?`Missing: ${esc(c.missing.join(', '))}`:'All report header fields are complete.'}</div>${subjectNote}</div>`;
-let rows=subjectNames.map((name,i)=>`<tr><td>${i+1}</td><td style="text-align:left">${esc(name)}</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`).join('');
-let possible=selected.length*100;
-pv.innerHTML=`<div class="result-preview printable" style="padding:14px;background:#fff"><div class="result-head"><h2>DE-TRINITY MONTESSORI EDUCATION CENTER</h2><div>TERMINAL ACADEMIC REPORT</div><small>First Term • 2026/2027</small></div><div class="result-meta"><div><b>Name:</b> ${esc(p.name)||'—'}</div><div><b>Class:</b> ${esc(p.class_name)||'—'}</div><div><b>Sex:</b> ${esc(p.sex)||'—'}</div><div><b>Age:</b> ${esc(p.age)||'—'}</div><div><b>Parent:</b> ${esc(p.parent_name)||'—'}</div><div><b>House:</b> ${esc(p.house)||'—'}</div><div><b>Fees payable:</b> ₦${money(p.fees_payable)}</div><div><b>Admission No.:</b> ${esc(p.admission_no)||'—'}</div></div><div class="result-status" style="margin:10px 0">Live preview — <b>0/${selected.length}</b> subjects have marks uploaded yet.</div><div class="table-wrap"><table class="result-table"><tr><th>S/N</th><th>SUBJECT</th><th>Test 1<br>/10</th><th>Test 2<br>/10</th><th>Test 3<br>/10</th><th>Test 4<br>/10</th><th>Exam<br>/60</th><th>Total<br>/100</th><th>Grade</th><th>Subj. Pos.</th></tr>${rows||`<tr><td colspan="10" style="padding:20px">Select the subjects this student will offer to see them here.</td></tr>`}<tr><th colspan="7">TOTAL / AVERAGE</th><th>0${possible?` / ${possible}`:''}</th><th colspan="2">0.00%</th></tr></table></div><div class="result-footer"><div><div class="sig">Class Teacher<br>${esc(p.class_teacher||'Class Teacher')}</div></div><div><div class="sig">Headmistress<br>${esc(p.headmistress||'Headmistress')}</div></div><div><div class="sig">Principal/Headmaster<br>${esc(p.headmaster||'Headmaster')}</div></div></div></div>`
-}
-async function saveFirstProfile(){
-try{let p={id:A.user.id,email:A.user.email,name:el('f_name').value,class_name:el('f_class').value,sex:el('f_sex').value,age:el('f_age').value,parent_name:el('f_parent').value,house:el('f_house').value,class_teacher:el('f_teacher').value,headmistress:el('f_headmistress').value,headmaster:el('f_headmaster').value,fees_payable:Number(el('f_fees').value||0),admission_no:el('f_adm').value,role:'student'};if(!p.name||!p.class_name)throw Error('Name and class are required');await up('school_profiles',p);A.profile=p;student()}catch(e){toast(e.message,false)}}
-
-function shell(title,subtitle,nav){
-document.getElementById('root').innerHTML=`<div class="top"><div><div class="brand">🏫 School Result Manager</div><small class="muted">${esc(A.profile?.name||'')}</small></div><div class="actions"><span class="pill">${A.profile?.role==='admin'?'ADMIN':'STUDENT'}</span><button class="btn secondary" onclick="signout()">Sign out</button></div></div><div class="wrap"><div class="layout"><aside class="side">${nav}</aside><main><div class="card"><h1>${esc(title)}</h1><p class="muted">${esc(subtitle||'')}</p></div><div id="content"></div></main></div></div>`}
-async function signout(){await sb.auth.signOut();location.reload()}
-
-async function admin(){
-shell('Admin Panel','Manage students, classes, subjects, terms, scores, mocks and published results.',`
-<button class="active" onclick="adminPage('dashboard',this)">📊 Dashboard</button>
-<button onclick="adminPage('students',this)">👨‍🎓 Students</button>
-<button onclick="adminPage('classes',this)">🏷️ Classes & Terms</button>
-<button onclick="adminPage('subjects',this)">📚 Subjects</button>
-<button onclick="adminPage('scores',this)">🧮 Result Spreadsheet</button>
-<button onclick="adminPage('mocks',this)">📝 Mock Tests</button>
-<button onclick="adminPage('results',this)">📄 Full Results</button>
-<button onclick="adminPage('publish',this)">🔓 Publish Results</button>
-<button onclick="adminPage('users',this)">👤 Users</button>
-<button onclick="adminPage('setup',this)">⚙️ Setup / Database</button>`);
-adminPage('dashboard',document.querySelector('.side button'))}
-async function adminPage(p,b){
-document.querySelectorAll('.side button').forEach(x=>x.classList.remove('active'));b?.classList.add('active');A.page=p;
-try{
-if(p==='dashboard')await adminDashboard();
-if(p==='students')await studentsPage();
-if(p==='classes')await classesPage();
-if(p==='subjects')await subjectsPage();
-if(p==='scores')await scoresPage();
-if(p==='mocks')await mocksPage();
-if(p==='results')await resultsPage();
-if(p==='publish')await publishPage();
-if(p==='users')await usersPage();
-if(p==='setup')setupPage();
-}catch(e){el('content').innerHTML='<div class="card"><b>Could not load this section.</b><p>'+esc(e.message)+'</p></div>'}}
-async function adminDashboard(){
-let [students,classes,mocks]=await Promise.all([q('school_profiles','*',[{op:'eq',col:'role',val:'student'}]),q('school_classes'),q('school_mocks')]);
-el('content').innerHTML=`<div class="grid g4"><div class="stat"><span class="muted">Students</span><b>${students.length}</b></div><div class="stat"><span class="muted">Classes</span><b>${classes.length}</b></div><div class="stat"><span class="muted">Mocks</span><b>${mocks.length}</b></div><div class="stat"><span class="muted">Published mocks</span><b>${mocks.filter(x=>x.published).length}</b></div></div>
-<div class="card"><h3>Workflow</h3><ol><li>Create classes and terms.</li><li>Add subjects.</li><li>Create student accounts/profiles and assign subjects.</li><li>Create mocks and set the destination test slot (Test 1–4).</li><li>Mocks automatically save the student's mark into the selected test slot after submission.</li><li>Enter or import exam marks out of 60.</li><li>Result Spreadsheet computes each subject total/grade, subject positions, average and class rank.</li><li>Publish the term result. Students see it only after publication.</li><li>Print an individual result: stamps and signatures are generated in the print layout.</li></ol></div>`}
-async function studentsPage(){
-let students=await q('school_profiles','*',[{op:'eq',col:'role',val:'student'}]);
-el('content').innerHTML=`<div class="card"><div class="actions"><button class="btn primary" onclick="newStudent()">+ Add student</button><button class="btn secondary" onclick="adminPage('scores')">Open result spreadsheet</button></div></div><div class="table-wrap"><table class="table"><tr><th>Name</th><th>Class</th><th>Sex</th><th>Age</th><th>Parent</th><th>House</th><th>Admission No.</th><th></th></tr>${students.map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(s.class_name)}</td><td>${esc(s.sex)}</td><td>${esc(s.age)}</td><td>${esc(s.parent_name)}</td><td>${esc(s.house)}</td><td>${esc(s.admission_no)}</td><td><button class="btn secondary small" onclick="editStudent('${s.id}')">Edit</button></td></tr>`).join('')}</table></div>`}
-async function loadStudentSubjects(studentId){let box=el('studentSubjectsBox');if(!box)return;try{let subjects=await q('school_subjects');let chosen=studentId?await q('school_student_subjects','*',[{op:'eq',col:'student_id',val:studentId},{op:'eq',col:'active',val:true}]):[];let ids=new Set(chosen.map(x=>x.subject_id));box.innerHTML=subjects.map(su=>`<label class="subject-check"><input type="checkbox" data-student-subject value="${su.id}" ${ids.has(su.id)?'checked':''} onchange="updateStudentLivePreview()"> <span>${esc(su.name)}</span></label>`).join('')||'<span class="muted small">No subjects have been created yet. Add them under Subjects first.</span>';updateStudentLivePreview()}catch(e){box.innerHTML='<span class="muted small">Could not load subjects: '+esc(e.message)+'</span>'}}
-function selectedStudentSubjectIds(){return [...document.querySelectorAll('input[data-student-subject]:checked')].map(x=>x.value)}
-async function saveStudentSubjects(studentId){let ids=selectedStudentSubjectIds();await del('school_student_subjects',[{op:'eq',col:'student_id',val:studentId}]);if(ids.length){let {error}=await sb.from('school_student_subjects').insert(ids.map(subject_id=>({student_id:studentId,subject_id,active:true})));if(error)throw error}}
-function newStudent(){openModal('Add student',profileForm()+`<div class="actions" style="margin-top:12px"><button class="btn primary" onclick="saveStudent(null)">Save student</button></div>`);updateStudentLivePreview();loadStudentSubjects(null)}
-async function editStudent(id){let s=await one('school_profiles','*',[{op:'eq',col:'id',val:id}]);openModal('Edit student',profileForm(s)+`<div class="actions" style="margin-top:12px"><button class="btn primary" onclick="saveStudent('${id}')">Save changes</button><button class="btn secondary" onclick="previewSavedStudent('${id}')">View full live result</button></div>`);updateStudentLivePreview();loadStudentSubjects(id)}
-async function saveStudent(id){try{let p=studentFormValues(),c=profileCompleteness(p),subjects=selectedStudentSubjectIds();if(c.missing.length)throw Error('Please complete the required fields: '+c.missing.join(', '));if(!subjects.length)throw Error('Select at least one subject this student will offer.');let sid=id||uuid();let row={id:sid,name:p.name,class_name:p.class_name,sex:p.sex,age:p.age,parent_name:p.parent_name,house:p.house,class_teacher:p.class_teacher,headmistress:p.headmistress,headmaster:p.headmaster,fees_payable:Number(p.fees_payable||0),admission_no:p.admission_no,password:p.password||undefined,role:'student'};await up('school_profiles',row);await saveStudentSubjects(sid);closeModal();toast('Student and subjects saved');studentsPage()}catch(e){toast(e.message,false)}}
-async function previewSavedStudent(id){try{let s=await one('school_profiles','*',[{op:'eq',col:'id',val:id}]);if(!s)throw Error('Student not found');let terms=await q('school_terms');let scores=await q('school_scores','*',[{op:'eq',col:'student_id',val:id}]);let allSubjects=await q('school_subjects');let assigned=await q('school_student_subjects','*',[{op:'eq',col:'student_id',val:id},{op:'eq',col:'active',val:true}]);let ids=new Set(assigned.map(x=>x.subject_id));let subjects=allSubjects.filter(x=>ids.has(x.id));let first=terms.find(t=>scores.some(x=>x.term_id===t.id))||terms[0]||null;let ss=first?scores.filter(x=>x.term_id===first.id):[];let rank=first?await one('school_term_ranks','*',[{op:'eq',col:'student_id',val:id},{op:'eq',col:'term_id',val:first.id}]):null;openModal('Full live result — '+s.name,`<div class="notice">${ss.length?`Showing ${ss.length} uploaded subject score record(s) out of ${subjects.length} assigned subjects.`:'No marks have been entered yet. Every assigned subject is shown below so you can see exactly what is still missing.'}</div>`+resultHTML(s,first,ss,subjects,rank))}catch(e){toast(e.message,false)}}
-
-async function classesPage(){
-let cs=await q('school_classes');let ts=await q('school_terms');
-el('content').innerHTML=`<div class="grid g2"><div class="card"><h3>Add class</h3><div class="grid"><div class="field"><label>Class name</label><input id="cname" placeholder="JSS 1"></div><button class="btn primary" onclick="addClass()">Add class</button></div><hr><h3>Classes</h3>${cs.map(c=>`<div class="actions" style="justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)"><span>${esc(c.name)}</span><span class="pill">${c.id.slice(0,6)}</span></div>`).join('')}</div>
-<div class="card"><h3>Add term/session</h3><div class="grid"><div class="field"><label>Term name</label><input id="tname" placeholder="First Term"></div><div class="field"><label>Session</label><input id="tsession" placeholder="2026/2027"></div><div class="field"><label>Class</label><select id="tclass">${cs.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div><button class="btn primary" onclick="addTerm()">Add term</button></div><hr><h3>Terms</h3>${ts.map(t=>`<div style="padding:7px 0;border-bottom:1px solid var(--line)">${esc(t.name)} — ${esc(t.session)}</div>`).join('')}</div></div>`}
-async function addClass(){try{await ins('school_classes',{name:el('cname').value});toast('Class added');classesPage()}catch(e){toast(e.message,false)}}
-async function addTerm(){try{await ins('school_terms',{name:el('tname').value,session:el('tsession').value,class_id:el('tclass').value});toast('Term added');classesPage()}catch(e){toast(e.message,false)}}
-
-async function subjectsPage(){
-let ss=await q('school_subjects');
-el('content').innerHTML=`<div class="card"><h3>Add subject</h3><div class="actions"><input id="sname" placeholder="Mathematics" style="flex:1;padding:10px;border:1px solid #d0d5dd;border-radius:10px"><button class="btn primary" onclick="addSubject()">Add</button></div></div><div class="table-wrap"><table class="table"><tr><th>Subject</th><th>ID</th></tr>${ss.map(s=>`<tr><td>${esc(s.name)}</td><td>${s.id}</td></tr>`).join('')}</table></div>`}
-async function addSubject(){try{await ins('school_subjects',{name:el('sname').value});toast('Subject added');subjectsPage()}catch(e){toast(e.message,false)}}
-
-async function selectors(){
-let [classes,terms,subjects,students]=await Promise.all([q('school_classes'),q('school_terms'),q('school_subjects'),q('school_profiles','*',[{op:'eq',col:'role',val:'student'}])]);
-return {classes,terms,subjects,students}}
-async function scoresPage(){
-let {classes,terms,subjects,students}=await selectors();
-el('content').innerHTML=`<div class="card"><div class="grid g4"><div class="field"><label>Class</label><select id="rs_class" onchange="loadScoreGrid()"><option value="">Select</option>${classes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div><div class="field"><label>Term</label><select id="rs_term" onchange="loadScoreGrid()"><option value="">Select</option>${terms.map(t=>`<option value="${t.id}">${esc(t.name)} — ${esc(t.session)}</option>`).join('')}</select></div><div class="field"><label>Subject</label><select id="rs_subject" onchange="loadScoreGrid()"><option value="">All subjects</option>${subjects.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div><div><label>&nbsp;</label><button class="btn secondary" onclick="importScores()">Import CSV-style marks</button></div></div><p class="muted small">Each Test slot is /10. Exam is /60. Total is /100. Enter marks manually here, or let published/scheduled mocks populate Test 1–4 automatically.</p></div><div id="scoreGrid"></div>`}
-async function loadScoreGrid(){
-let cid=el('rs_class').value,tid=el('rs_term').value,sid=el('rs_subject').value;if(!cid||!tid)return;
-let students=await q('school_profiles','*',[{op:'eq',col:'role',val:'student'},{op:'eq',col:'class_name',val:(await one('school_classes','name',[{op:'eq',col:'id',val:cid}]))?.name}]);
-let allSubs=await q('school_subjects');let assignments=await q('school_student_subjects','*',[{op:'eq',col:'active',val:true}]);let assignedByStudent={};assignments.forEach(a=>(assignedByStudent[a.student_id]??=[]).push(a.subject_id));let subs=sid?allSubs.filter(x=>x.id===sid):allSubs;
-let scores=await q('school_scores','*',[{op:'eq',col:'class_id',val:cid},{op:'eq',col:'term_id',val:tid}]);
-let by={};scores.forEach(x=>by[x.student_id+'_'+x.subject_id]=x);
-let rows=[];
-for(const st of students){let studentSubs=subs.filter(su=>(assignedByStudent[st.id]||[]).includes(su.id));for(const su of studentSubs){let x=by[st.id+'_'+su.id]||{student_id:st.id,subject_id:su.id,test1:null,test2:null,test3:null,test4:null,exam:null};rows.push(`<tr><td>${esc(st.name)}</td><td>${esc(su.name)}</td>${['test1','test2','test3','test4','exam'].map(k=>`<td><input type="number" min="0" max="${k==='exam'?60:10}" value="${x[k]??''}" data-score="${st.id}|${su.id}|${k}" style="width:72px"></td>`).join('')}<td>${Number(x.total||0)}</td><td>${x.grade||''}</td></tr>`)}} 
-el('scoreGrid').innerHTML=`<div class="card"><div class="actions"><button class="btn primary" onclick="saveGrid()">Save marks & compute</button><button class="btn secondary" onclick="computeAll()">Recompute positions & averages</button></div></div><div class="table-wrap"><table class="table"><tr><th>Student</th><th>Subject</th><th>Test 1 /10</th><th>Test 2 /10</th><th>Test 3 /10</th><th>Test 4 /10</th><th>Exam /60</th><th>Total /100</th><th>Grade</th></tr>${rows.join('')}</table></div>`}
-async function saveGrid(){
-let cid=el('rs_class').value,tid=el('rs_term').value;let inputs=[...document.querySelectorAll('[data-score]')];let groups={};
-inputs.forEach(i=>{let [student_id,subject_id,k]=i.dataset.score;groups[student_id+'_'+subject_id]??={student_id,subject_id,class_id:cid,term_id:tid};groups[student_id+'_'+subject_id][k]=i.value===''?null:Number(i.value)});
-try{for(let x of Object.values(groups)){x.total=['test1','test2','test3','test4','exam'].reduce((a,k)=>a+(Number(x[k])||0),0);x.grade=grade(x.total);await up('school_scores',x)}await computeAll();toast('Marks saved and result computed')}catch(e){toast(e.message,false)}}
-async function computeAll(){
-let cid=el('rs_class').value,tid=el('rs_term').value;if(!cid||!tid)return;
-let scores=await q('school_scores','*',[{op:'eq',col:'class_id',val:cid},{op:'eq',col:'term_id',val:tid}]);
-let students=[...new Set(scores.map(x=>x.student_id))];
-let subjectGroups={};scores.forEach(s=>(subjectGroups[s.subject_id]??=[]).push(s));
-for(const sid in subjectGroups){let arr=subjectGroups[sid].sort((a,b)=>(b.total||0)-(a.total||0));for(let i=0;i<arr.length;i++){let pos=i+1;await up('school_scores',{id:arr[i].id,position:pos,grade:grade(arr[i].total),total:Number(arr[i].total||0)})}}
-let totals={};scores.forEach(s=>totals[s.student_id]=(totals[s.student_id]||0)+Number(s.total||0));
-let rank=Object.entries(totals).sort((a,b)=>b[1]-a[1]);for(let i=0;i<rank.length;i++){await up('school_term_ranks',{student_id:rank[i][0],class_id:cid,term_id:tid,total_score:rank[i][1],average:rank[i][1]/Math.max(1,scores.filter(x=>x.student_id===rank[i][0]).length),position:i+1})}
-if(el('scoreGrid'))loadScoreGrid()}
-function importScores(){
-openModal('Manual / bulk marks upload',`<h3>Upload many marks at once</h3><p class="muted">Use this when you already have marks in a spreadsheet. You do <b>not</b> need to know UUIDs anymore.</p><div class="notice"><b>Format — one line per student and subject:</b><br><code>Admission No,Subject,Test1,Test2,Test3,Test4,Exam</code><br><code>001,Mathematics,8,9,7,10,52</code><br><code>002,English Language,9,8,10,9,55</code></div><p class="muted small">The system matches the admission number to the student and the subject name to the subject. Marks are Test 1–4 out of 10 and Exam out of 60.</p><textarea id="csv" placeholder="001,Mathematics,8,9,7,10,52\n002,English Language,9,8,10,9,55" style="width:100%;min-height:190px;margin-top:10px"></textarea><div class="actions" style="margin-top:10px"><button class="btn primary" onclick="runImport()">Upload marks</button><button class="btn secondary" onclick="closeModal()">Cancel</button></div>`)}
-async function runImport(){try{let cid=el('rs_class').value,tid=el('rs_term').value;if(!cid||!tid)throw Error('Select a class and term first.');let students=await q('school_profiles','*',[{op:'eq',col:'role',val:'student'}]);let subjects=await q('school_subjects');let assigned=await q('school_student_subjects','*',[{op:'eq',col:'active',val:true}]);let rows=el('csv').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);let errors=[];let count=0;for(let line of rows){let p=line.split(',').map(x=>x.trim());if(/^admission\s*no/i.test(p[0]))continue;if(p.length<7){errors.push('Invalid row: '+line);continue}let [adm,subjectName,t1,t2,t3,t4,exam]=p;let st=students.find(x=>String(x.admission_no||'').toLowerCase()===adm.toLowerCase());let su=subjects.find(x=>String(x.name||'').toLowerCase()===subjectName.toLowerCase());if(!st){errors.push('Student not found: '+adm);continue}if(!su){errors.push('Subject not found: '+subjectName);continue}if(!assigned.some(a=>a.student_id===st.id&&a.subject_id===su.id)){errors.push(`${adm} is not assigned ${subjectName}`);continue}let vals=[t1,t2,t3,t4,exam].map(Number);if(vals.some((v,i)=>Number.isNaN(v)||v<0||v>(i===4?60:10))){errors.push('Invalid marks: '+line);continue}let total=vals.reduce((a,x)=>a+x,0);await up('school_scores',{student_id:st.id,subject_id:su.id,class_id:cid,term_id:tid,test1:vals[0],test2:vals[1],test3:vals[2],test4:vals[3],exam:vals[4],total,grade:grade(total)});count++}await computeAll();closeModal();toast(`${count} mark row(s) uploaded${errors.length?' • '+errors.length+' row(s) need attention':''}`);if(errors.length)setTimeout(()=>openModal('Upload report',`<div class="notice">${errors.map(x=>esc(x)).join('<br>')}</div>`),200)}catch(e){toast(e.message,false)}}
-
-let mockQuestions=[];
-function questionTemplate(){return {question:'',A:'',B:'',C:'',D:'',answer:'A',explanation:'',mark:1}}
-function normalizeQuestion(q){
-  q=q||{};
-  const get=(...keys)=>{for(const k of keys){if(q[k]!==undefined&&q[k]!==null)return String(q[k]).trim()}return ''};
-  let ans=get('answer','correct_answer','correctAnswer').toUpperCase().replace(/[^ABCD]/g,'').slice(0,1);
-  return {question:get('question','Question','q'),A:get('A','a','option_a','optionA'),B:get('B','b','option_b','optionB'),C:get('C','c','option_c','optionC'),D:get('D','d','option_d','optionD'),answer:ans||'A',explanation:get('explanation','Explanation','reason'),mark:Number(q.mark||q.marks||1)||1};
-}
-function parseBulkQuestions(text){
-  text=String(text||'').trim();
-  if(!text)return [];
-  // JSON is supported for users who already have questions in JSON format.
-  try{
-    const j=JSON.parse(text);
-    if(Array.isArray(j))return j.map(normalizeQuestion);
-    if(Array.isArray(j.questions))return j.questions.map(normalizeQuestion);
-  }catch(e){}
-  const lines=text.replace(/\r/g,'').split('\n');
-  const out=[];let cur=null;
-  const startQuestion=(v)=>{if(cur&&cur.question)out.push(normalizeQuestion(cur));cur=questionTemplate();cur.question=v.trim()};
-  for(let raw of lines){
-    let line=raw.trim();
-    if(!line){continue}
-    let m=line.match(/^(?:Q(?:uestion)?\s*\d*\s*[:.)-]?|\d+\s*[.)-])\s*(.+)$/i);
-    if(m){startQuestion(m[1]);continue}
-    m=line.match(/^question\s*[:.)-]\s*(.+)$/i);if(m){startQuestion(m[1]);continue}
-    m=line.match(/^([ABCD])\s*[.)\:-]\s*(.+)$/i);if(m&&cur){cur[m[1].toUpperCase()]=m[2].trim();continue}
-    m=line.match(/^(?:answer|correct\s*answer)\s*[:=\-]\s*([ABCD])/i);if(m&&cur){cur.answer=m[1].toUpperCase();continue}
-    m=line.match(/^(?:explanation|solution|reason)\s*[:=\-]\s*(.*)$/i);if(m&&cur){cur.explanation=m[1].trim();continue}
-    m=line.match(/^(?:mark|marks)\s*[:=\-]\s*(\d+(?:\.\d+)?)/i);if(m&&cur){cur.mark=Number(m[1]);continue}
-    // If a question has not started, treat the first free-text line as its question.
-    if(!cur)startQuestion(line);
-    else if(!cur.A&&!cur.B&&!cur.C&&!cur.D)cur.question=(cur.question+' '+line).trim();
-    else if(cur.explanation)cur.explanation=(cur.explanation+' '+line).trim();
+async function saveSettings(){
+  const fields = {
+    school_name: $('setSchoolName').value.trim(), school_address: $('setSchoolAddress').value.trim(),
+    class_teacher_name: $('setTeacher').value.trim(), headmistress_name: $('setHeadmistress').value.trim(),
+    proprietress_name: $('setProprietress').value.trim(), fees_payable: $('setFees').value.trim(),
+    reopening_date: $('setReopen').value.trim()
+  };
+  for (const [key, value] of Object.entries(fields)) {
+    await sb.from('rs_settings').upsert({ key, value }, { onConflict: 'key' });
   }
-  if(cur&&cur.question)out.push(normalizeQuestion(cur));
-  return out;
+  toast('Settings saved','success');
+  $('settingsMsg').innerHTML = `<div class="banner success">Saved.</div>`;
 }
-function renderQuestionPreview(){
-  const box=el('questionPreview');if(!box)return;
-  if(!mockQuestions.length){box.innerHTML='<div class="muted small">No questions added yet.</div>';return}
-  box.innerHTML=mockQuestions.map((q,i)=>`<div class="q"><div class="actions" style="justify-content:space-between"><b>${i+1}. ${esc(q.question)}</b><button class="btn danger small" onclick="removeMockQuestion(${i})">Remove</button></div><div class="small muted">A. ${esc(q.A)} &nbsp; B. ${esc(q.B)} &nbsp; C. ${esc(q.C)} &nbsp; D. ${esc(q.D)}</div><div class="small"><b>Answer:</b> ${esc(q.answer)} &nbsp; <b>Mark:</b> ${esc(q.mark)}${q.explanation?` &nbsp; <b>Explanation:</b> ${esc(q.explanation)}`:''}</div></div>`).join('');
-  el('m_questions').value=JSON.stringify(mockQuestions);
+
+/* ============================================================
+   STUDENT PORTAL
+   ============================================================ */
+async function studentHome(){
+  const s = loadSession();
+  app.innerHTML = `<div class="content"><p class="muted">Loading…</p></div>`;
+  const mocks = await studentAvailableMocks(s.classId);
+  const attempted = (await sb.from('rs_mock_attempts').select('mock_id').eq('student_id', s.id)).data || [];
+  const attemptedIds = new Set(attempted.map(a=>a.mock_id));
+  const { data: publishedTerms } = await sb.from('rs_publish').select('*, rs_terms(*, rs_sessions(*))').eq('class_id', s.classId).eq('published', true);
+
+  app.innerHTML = `
+    <div class="topbar">
+      <span class="brand">🏫 ${esc(s.name)} — ${esc(s.className||'')}</span>
+      <button class="btn sm outline" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="logout()">Logout</button>
+    </div>
+    <div class="content">
+      <div class="card">
+        <h2>📝 Available Mocks</h2>
+        ${mocks.length===0 ? `<p class="muted">No mocks open right now.</p>` : mocks.map(m => `
+          <div class="list-item">
+            <span><strong>${esc(m.title)}</strong><br><span class="muted">Closes ${fmtDateTime(m.end_time)} · ${m.duration_minutes} min</span></span>
+            ${attemptedIds.has(m.id) ? `<span class="pill green">Completed</span>` : `<button class="btn sm" onclick="studentTakeMock('${m.id}')">Take Mock</button>`}
+          </div>`).join('')}
+      </div>
+      <div class="card">
+        <h2>📄 Your Results</h2>
+        ${(!publishedTerms || publishedTerms.length===0) ? `<p class="muted">No results have been published yet.</p>` : publishedTerms.map(p => `
+          <div class="list-item">
+            <span>${esc(p.rs_terms?.name||'')} · ${esc(p.rs_terms?.rs_sessions?.name||'')}</span>
+            <button class="btn sm outline" onclick="showPrintPage('${s.id}','${s.classId}','${p.term_id}','studentHome')">View Result</button>
+          </div>`).join('')}
+      </div>
+    </div>`;
 }
-function addSingleQuestion(){
-  const q=normalizeQuestion({question:el('sq_question').value,A:el('sq_A').value,B:el('sq_B').value,C:el('sq_C').value,D:el('sq_D').value,answer:el('sq_answer').value,explanation:el('sq_explanation').value,mark:el('sq_mark').value});
-  if(!q.question||!q.A||!q.B||!q.C||!q.D){toast('Fill the question and all four options',false);return}
-  mockQuestions.push(q);['sq_question','sq_A','sq_B','sq_C','sq_D','sq_explanation'].forEach(id=>el(id).value='');el('sq_answer').value='A';el('sq_mark').value='1';renderQuestionPreview();toast('Question added')
-}
-function parseAndAddBulk(){
-  try{
-    const qs=parseBulkQuestions(el('bulk_questions').value);
-    if(!qs.length)throw new Error('No questions were detected. Use the format shown below.');
-    const bad=qs.findIndex(q=>!q.question||!q.A||!q.B||!q.C||!q.D||!['A','B','C','D'].includes(q.answer));
-    if(bad>=0)throw new Error('Question '+(bad+1)+' is incomplete. Every question needs the question, A-D options and an answer.');
-    mockQuestions.push(...qs);el('bulk_questions').value='';renderQuestionPreview();toast(qs.length+' question'+(qs.length===1?'':'s')+' added')
-  }catch(e){toast(e.message,false)}
-}
-function removeMockQuestion(i){mockQuestions.splice(i,1);renderQuestionPreview()}
-function clearMockQuestions(){mockQuestions=[];renderQuestionPreview()}
-async function mocksPage(){
-let {classes,terms,subjects}=await selectors();let mocks=await q('school_mocks');mockQuestions=[];
-el('content').innerHTML=`<div class="card"><h3>Create mock</h3><div class="grid g3"><div class="field"><label>Title</label><input id="m_title" placeholder="Mathematics Test 1 Mock"></div><div class="field"><label>Class</label><select id="m_class">${classes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div><div class="field"><label>Term</label><select id="m_term">${terms.map(t=>`<option value="${t.id}">${esc(t.name)} — ${esc(t.session)}</option>`).join('')}</select></div><div class="field"><label>Subject</label><select id="m_subject">${subjects.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div><div class="field"><label>Destination test slot</label><select id="m_slot"><option value="1">Test 1</option><option value="2">Test 2</option><option value="3">Test 3</option><option value="4">Test 4</option></select></div><div class="field"><label>Duration (minutes)</label><input id="m_duration" type="number" value="30"></div><div class="field"><label>Start date/time</label><input id="m_start" type="datetime-local"></div><div class="field"><label>Close date/time</label><input id="m_end" type="datetime-local"></div></div></div>
-<div class="card"><h3>Questions</h3><p class="muted">Add questions one at a time or paste many questions at once. Each question supports four options, the correct answer, an explanation and marks.</p><div class="tabs"><button class="tab active" id="singleQTab" onclick="questionTab('single')">Single question</button><button class="tab" id="bulkQTab" onclick="questionTab('bulk')">Bulk question parser</button></div><div id="singleQuestionBox"><div class="grid g2"><div class="field" style="grid-column:1/-1"><label>Question</label><textarea id="sq_question" placeholder="What is 2 + 2?"></textarea></div><div class="field"><label>Option A</label><input id="sq_A" placeholder="3"></div><div class="field"><label>Option B</label><input id="sq_B" placeholder="4"></div><div class="field"><label>Option C</label><input id="sq_C" placeholder="5"></div><div class="field"><label>Option D</label><input id="sq_D" placeholder="6"></div><div class="field"><label>Correct answer</label><select id="sq_answer"><option>A</option><option>B</option><option>C</option><option>D</option></select></div><div class="field"><label>Mark</label><input id="sq_mark" type="number" min="0.1" step="0.1" value="1"></div><div class="field" style="grid-column:1/-1"><label>Explanation</label><textarea id="sq_explanation" placeholder="Explain why the correct answer is B..."></textarea></div></div><div class="actions" style="margin-top:10px"><button class="btn primary" onclick="addSingleQuestion()">+ Add question</button></div></div><div id="bulkQuestionBox" class="hidden"><div class="field"><label>Paste bulk questions</label><textarea id="bulk_questions" style="min-height:280px" placeholder="Q1. What is 2 + 2?\nA. 3\nB. 4\nC. 5\nD. 6\nAnswer: B\nExplanation: 2 + 2 equals 4.\nMark: 1\n\nQ2. What is the capital of Nigeria?\nA. Lagos\nB. Abuja\nC. Kano\nD. Enugu\nAnswer: B\nExplanation: Abuja is the capital city of Nigeria.\nMark: 1"></textarea></div><p class="muted small">JSON arrays are also accepted. You can paste <code>[{"question":"...","A":"...","B":"...","C":"...","D":"...","answer":"B","explanation":"...","mark":1}]</code></p><button class="btn primary" onclick="parseAndAddBulk()">Parse & add questions</button></div><div id="questionPreview" style="margin-top:14px"></div><input type="hidden" id="m_questions"></div>
-<div class="card"><div class="actions"><button class="btn primary" onclick="createMock()">Create mock</button><button class="btn secondary" onclick="clearMockQuestions()">Clear questions</button></div><p class="muted small">The mock is normalized/capped to the selected Test slot's 10 marks. On submission the student's best/selected score is written into Test 1–4.</p></div>
-<div class="table-wrap"><table class="table"><tr><th>Title</th><th>Subject</th><th>Slot</th><th>Schedule</th><th>Published</th><th></th></tr>${mocks.map(m=>`<tr><td>${esc(m.title)}</td><td>${esc(m.subject_name||m.subject_id)}</td><td>Test ${m.target_test}</td><td>${fmtDate(m.start_at)}</td><td>${m.published?'Yes':'No'}</td><td><button class="btn ${m.published?'danger':'ok'} small" onclick="toggleMock('${m.id}',${!m.published})">${m.published?'Unpublish':'Publish'}</button></td></tr>`).join('')}</table></div>`}
-function questionTab(mode){
-  const single=mode==='single';el('singleQuestionBox').classList.toggle('hidden',!single);el('bulkQuestionBox').classList.toggle('hidden',single);el('singleQTab').classList.toggle('active',single);el('bulkQTab').classList.toggle('active',!single)
-}
-async function createMock(){try{if(!mockQuestions.length)throw new Error('Add at least one question before creating the mock.');await ins('school_mocks',{title:el('m_title').value,class_id:el('m_class').value,term_id:el('m_term').value,subject_id:el('m_subject').value,target_test:+el('m_slot').value,total_marks:10,duration_minutes:+el('m_duration').value,start_at:el('m_start').value||null,end_at:el('m_end').value||null,questions:mockQuestions,published:false,created_by:A.user.id});toast('Mock created with '+mockQuestions.length+' questions');mocksPage()}catch(e){toast(e.message,false)}}
-async function toggleMock(id,v){try{await up('school_mocks',{id,published:v});toast(v?'Mock published':'Mock unpublished');mocksPage()}catch(e){toast(e.message,false)}}
 
-async function publishPage(){
-let {classes,terms}=await selectors();
-el('content').innerHTML=`<div class="card"><h3>Publish final result</h3><p class="muted">Students cannot see result details until this switch is on for their class/term.</p><div class="grid g2"><div class="field"><label>Class</label><select id="p_class">${classes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div><div class="field"><label>Term</label><select id="p_term">${terms.map(t=>`<option value="${t.id}">${esc(t.name)} — ${esc(t.session)}</option>`).join('')}</select></div></div><button class="btn primary" onclick="publishResult()">Publish result</button></div>`}
-async function publishResult(){try{await up('school_releases',{class_id:el('p_class').value,term_id:el('p_term').value,published:true,published_at:new Date().toISOString(),published_by:A.user.id});toast('Result published')}catch(e){toast(e.message,false)}}
-
-async function resultsPage(){
-let students=await q('school_profiles','*',[{op:'eq',col:'role',val:'student'}]);
-el('content').innerHTML=`<div class="card"><h3>Full result tracker</h3><p class="muted">Open any student to see the complete report card, every assigned subject, all Test 1–4 and Exam marks, grades, subject positions, total, average and class position. Blank cells show what still needs to be uploaded.</p></div><div class="table-wrap"><table class="table"><tr><th>Student</th><th>Class</th><th>Parent</th><th>Profile</th><th>Result status</th><th></th></tr>${students.map(s=>{let c=profileCompleteness(s);return `<tr><td>${esc(s.name)}</td><td>${esc(s.class_name)}</td><td>${esc(s.parent_name)}</td><td><span class="pill">${c.pct}% complete</span></td><td><button class="btn secondary small" onclick="lifeResult('${s.id}')">Check full result</button></td><td><button class="btn primary small" onclick="editStudent('${s.id}')">Edit student</button></td></tr>`}).join('')}</table></div>`}
-async function lifeResult(id){let s=await one('school_profiles','*',[{op:'eq',col:'id',val:id}]);let scores=await q('school_scores','*',[{op:'eq',col:'student_id',val:id}]);let allSubjects=await q('school_subjects');let assigned=await q('school_student_subjects','*',[{op:'eq',col:'student_id',val:id},{op:'eq',col:'active',val:true}]);let assignedIds=new Set(assigned.map(x=>x.subject_id));let subjects=allSubjects.filter(x=>assignedIds.has(x.id));let terms=await q('school_terms');let completeness=profileCompleteness(s);let body=`<div class="profile-check ${completeness.missing.length?'warn':'good'}"><b>Profile completeness: ${completeness.pct}%</b><div class="profile-progress"><span style="width:${completeness.pct}%"></span></div>${completeness.missing.length?`Missing: ${esc(completeness.missing.join(', '))}`:'All report header fields are complete.'}</div><div class="notice ${subjects.length?'ok':''}" style="margin-top:10px">${subjects.length?`<b>${subjects.length} subject(s) assigned:</b> ${esc(subjects.map(x=>x.name).join(', '))}`:'No subjects assigned yet — edit the student and select the subjects they offer.'}</div>`;for(const t of terms){let ss=scores.filter(x=>x.term_id===t.id);let hasRelevant=ss.length||subjects.length;if(hasRelevant){let total=ss.reduce((a,x)=>a+Number(x.total||0),0);let possible=subjects.length*100;let average=subjects.length?total/subjects.length:0;let rank=await one('school_term_ranks','*',[{op:'eq',col:'student_id',val:id},{op:'eq',col:'term_id',val:t.id}]);body+=`<div class="card" style="margin-top:12px"><h3>${esc(t.name)} — ${esc(t.session)}</h3><p class="muted">Uploaded score records: ${ss.length} / ${subjects.length} subjects • Total: ${total} / ${possible} • Average: ${average.toFixed(2)}% • Class position: ${rank?.position||'—'}</p>${resultHTML(s,t,ss,subjects,rank)}</div>`}}openModal('Full result — '+s.name,body)}
-async function usersPage(){
-let users=await q('school_profiles');
-el('content').innerHTML=`<div class="card"><h3>Roles</h3><p class="muted">Use role <b>admin</b> only for trusted school staff. Do not make a normal student an admin.</p></div><div class="table-wrap"><table class="table"><tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr>${users.map(u=>`<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td><select onchange="changeRole('${u.id}',this.value)"><option ${u.role==='student'?'selected':''}>student</option><option ${u.role==='admin'?'selected':''}>admin</option></select></td><td>${u.id===A.user.id?'Current user':''}</td></tr>`).join('')}</table></div>`}
-async function changeRole(id,role){try{await up('school_profiles',{id,role});toast('Role updated')}catch(e){toast(e.message,false)}}
-
-function setupPage(){
-el('content').innerHTML=`<div class="card"><h3>Supabase SQL schema</h3><p class="muted">Run this once in Supabase SQL Editor. It creates the tables used by this index.html. After running it, create the first account, then change that user's role to <code>admin</code> directly in the database.</p><textarea readonly style="width:100%;min-height:520px;font-family:ui-monospace">${esc(SQL)}</textarea><div class="notice small" style="margin-top:10px">Important: RLS policies must be tightened before production. The simple policies below are suitable for getting the prototype running, not for a high-security school deployment.</div></div>`}
-const SQL=`
-create extension if not exists pgcrypto;
-
-create table if not exists public.school_profiles(
- id uuid primary key,
- email text, name text not null, class_name text, sex text, age int,
- parent_name text, house text, class_teacher text, headmistress text, password text,
- headmaster text, fees_payable numeric default 0, admission_no text,
- role text default 'student' check(role in ('student','admin')),
- created_at timestamptz default now()
-);
-
-create table if not exists public.school_classes(
- id uuid primary key default gen_random_uuid(), name text unique not null,
- created_at timestamptz default now()
-);
-
-create table if not exists public.school_terms(
- id uuid primary key default gen_random_uuid(), class_id uuid references public.school_classes(id) on delete cascade,
- name text not null, session text not null, created_at timestamptz default now()
-);
-
-create table if not exists public.school_subjects(
- id uuid primary key default gen_random_uuid(), name text unique not null
-);
-
-create table if not exists public.school_student_subjects(
- id uuid primary key default gen_random_uuid(),
- student_id uuid not null references public.school_profiles(id) on delete cascade,
- subject_id uuid not null references public.school_subjects(id) on delete cascade,
- active boolean default true,
- created_at timestamptz default now(),
- unique(student_id,subject_id)
-);
-
-create table if not exists public.school_scores(
- id uuid primary key default gen_random_uuid(),
- student_id uuid references public.school_profiles(id) on delete cascade,
- class_id uuid references public.school_classes(id) on delete cascade,
- term_id uuid references public.school_terms(id) on delete cascade,
- subject_id uuid references public.school_subjects(id) on delete cascade,
- test1 numeric default 0, test2 numeric default 0, test3 numeric default 0, test4 numeric default 0,
- exam numeric default 0, total numeric default 0, grade text, position int,
- unique(student_id,term_id,subject_id)
-);
-
-create table if not exists public.school_term_ranks(
- id uuid primary key default gen_random_uuid(), student_id uuid references public.school_profiles(id) on delete cascade,
- class_id uuid references public.school_classes(id) on delete cascade,
- term_id uuid references public.school_terms(id) on delete cascade,
- total_score numeric default 0, average numeric default 0, position int,
- unique(student_id,term_id)
-);
-
-create table if not exists public.school_mocks(
- id uuid primary key default gen_random_uuid(), title text not null,
- class_id uuid references public.school_classes(id) on delete cascade,
- term_id uuid references public.school_terms(id) on delete cascade,
- subject_id uuid references public.school_subjects(id) on delete cascade,
- target_test int check(target_test between 1 and 4),
- total_marks numeric default 10, duration_minutes int default 30,
- start_at timestamptz, end_at timestamptz, published boolean default false,
- questions jsonb default '[]'::jsonb, created_by uuid references public.school_profiles(id),
- created_at timestamptz default now()
-);
-
-create table if not exists public.school_mock_attempts(
- id uuid primary key default gen_random_uuid(),
- mock_id uuid references public.school_mocks(id) on delete cascade,
- student_id uuid references public.school_profiles(id) on delete cascade,
- score numeric default 0, answers jsonb default '{}'::jsonb,
- submitted_at timestamptz default now(),
- unique(mock_id,student_id)
-);
-
-create table if not exists public.school_releases(
- id uuid primary key default gen_random_uuid(),
- class_id uuid references public.school_classes(id) on delete cascade,
- term_id uuid references public.school_terms(id) on delete cascade,
- published boolean default false, published_at timestamptz, published_by uuid references public.school_profiles(id),
- unique(class_id,term_id)
-);
-
-alter table public.school_profiles enable row level security;
-alter table public.school_classes enable row level security;
-alter table public.school_terms enable row level security;
-alter table public.school_subjects enable row level security;
-alter table public.school_student_subjects enable row level security;
-alter table public.school_scores enable row level security;
-alter table public.school_term_ranks enable row level security;
-alter table public.school_mocks enable row level security;
-alter table public.school_mock_attempts enable row level security;
-alter table public.school_releases enable row level security;
-
-create or replace function public.is_admin() returns boolean language sql stable security definer set search_path=public as $$
- select exists(select 1 from public.school_profiles where id=auth.uid() and role='admin');
-$$;
-
-create policy "profiles own or admin" on public.school_profiles for all using(auth.uid()=id or public.is_admin()) with check(auth.uid()=id or public.is_admin());
-create policy "classes authenticated" on public.school_classes for select using(auth.role()='authenticated');
-create policy "classes admin write" on public.school_classes for all using(public.is_admin()) with check(public.is_admin());
-create policy "terms authenticated" on public.school_terms for select using(auth.role()='authenticated');
-create policy "terms admin write" on public.school_terms for all using(public.is_admin()) with check(public.is_admin());
-create policy "subjects authenticated" on public.school_subjects for select using(auth.role()='authenticated');
-create policy "subjects admin write" on public.school_subjects for all using(public.is_admin()) with check(public.is_admin());
-
-create policy "student subjects admin" on public.school_student_subjects for all using(public.is_admin()) with check(public.is_admin());
-
-create policy "scores own or admin" on public.school_scores for select using(student_id=auth.uid() or public.is_admin());
-create policy "scores admin write" on public.school_scores for all using(public.is_admin()) with check(public.is_admin());
-
-create policy "ranks own or admin" on public.school_term_ranks for select using(student_id=auth.uid() or public.is_admin());
-create policy "ranks admin write" on public.school_term_ranks for all using(public.is_admin()) with check(public.is_admin());
-
-create policy "published mocks visible" on public.school_mocks for select using(published=true or public.is_admin());
-create policy "mocks admin write" on public.school_mocks for all using(public.is_admin()) with check(public.is_admin());
-
-create policy "attempt own or admin" on public.school_mock_attempts for select using(student_id=auth.uid() or public.is_admin());
-create policy "attempt own insert" on public.school_mock_attempts for insert with check(student_id=auth.uid());
-create policy "attempt admin" on public.school_mock_attempts for all using(public.is_admin()) with check(public.is_admin());
-
-create policy "release visible" on public.school_releases for select using(public.is_admin() or published=true);
-create policy "release admin write" on public.school_releases for all using(public.is_admin()) with check(public.is_admin());
-`;
-
-async function student(){
-shell('Student Portal','Only published mocks and published results are visible to students.',`
-<button class="active" onclick="studentPage('home',this)">🏠 Home</button>
-<button onclick="studentPage('mocks',this)">📝 My Mocks</button>
-<button onclick="studentPage('result',this)">📄 My Result</button>
-<button onclick="studentPage('profile',this)">👤 Profile</button>`);
-studentPage('home',document.querySelector('.side button'))}
-async function studentPage(p,b){
-document.querySelectorAll('.side button').forEach(x=>x.classList.remove('active'));b?.classList.add('active');
-try{if(p==='home')studentHome();if(p==='mocks')studentMocks();if(p==='result')studentResult();if(p==='profile')studentProfile()}catch(e){el('content').innerHTML='<div class="card">'+esc(e.message)+'</div>'}}
-async function studentHome(){let mocks=await q('school_mocks');el('content').innerHTML=`<div class="grid g3"><div class="stat"><span class="muted">Published mocks</span><b>${mocks.length}</b></div><div class="stat"><span class="muted">Class</span><b style="font-size:20px">${esc(A.profile.class_name)}</b></div><div class="stat"><span class="muted">Result</span><b style="font-size:20px">Locked until published</b></div></div><div class="card"><h3>What you can access</h3><p>You can take only mocks the school has published. Your full result, grades, positions and average remain hidden until the admin publishes the result.</p></div>`}
-async function studentMocks(){
-let mocks=await q('school_mocks','*',[{op:'eq',col:'published',val:true}]);let attempts=await q('school_mock_attempts','*',[{op:'eq',col:'student_id',val:A.user.id}]);
-el('content').innerHTML=`<div class="table-wrap"><table class="table"><tr><th>Mock</th><th>Subject</th><th>Test slot</th><th>Schedule</th><th>Status</th><th></th></tr>${mocks.map(m=>{let a=attempts.find(x=>x.mock_id===m.id);return `<tr><td>${esc(m.title)}</td><td>${esc(m.subject_id)}</td><td>Test ${m.target_test}</td><td>${fmtDate(m.start_at)}</td><td>${a?'Completed':'Available'}</td><td>${a?'<span class="pill">Submitted</span>':`<button class="btn primary small" onclick="takeMock('${m.id}')">Take mock</button>`}</td></tr>`}).join('')}</table></div>`}
-async function takeMock(id){
-let m=await one('school_mocks','*',[{op:'eq',col:'id',val:id}]);if(!m)return;let qs=Array.isArray(m.questions)?m.questions:[];
-openModal(m.title,`<div id="mockbody">${qs.map((q,i)=>`<div class="q"><b>${i+1}. ${esc(q.question)}</b>${['A','B','C','D'].map(L=>`<label class="option"><input type="radio" name="q${i}" value="${L}"> ${L}. ${esc(q[L])}</label>`).join('')}</div>`).join('')}<div class="actions"><button class="btn primary" onclick="submitMock('${m.id}',${JSON.stringify(qs).replace(/</g,'\\u003c')})">Submit mock</button></div></div>`)}
-async function submitMock(id,qs){
-try{let score=0;qs.forEach((q,i)=>{let a=document.querySelector(`input[name="q${i}"]:checked`)?.value;if(a&&a===q.answer)score+=Number(q.mark||1)});let rawMax=qs.reduce((a,q)=>a+Number(q.mark||1),0);let normalized=rawMax?Math.min(10,score/rawMax*10):0;let m=await one('school_mocks','*',[{op:'eq',col:'id',val:id}]);await up('school_mock_attempts',{mock_id:id,student_id:A.user.id,score:normalized,answers:{},submitted_at:new Date().toISOString()});
-let existing=await one('school_scores','*',[{op:'eq',col:'student_id',val:A.user.id},{op:'eq',col:'term_id',val:m.term_id},{op:'eq',col:'subject_id',val:m.subject_id}]);
-let slot='test'+m.target_test;let row=existing||{student_id:A.user.id,class_id:m.class_id,term_id:m.term_id,subject_id:m.subject_id};row[slot]=Math.round(normalized*100)/100;row.total=['test1','test2','test3','test4','exam'].reduce((a,k)=>a+(Number(row[k])||0),0);row.grade=grade(row.total);await up('school_scores',row);closeModal();toast('Mock submitted. Your score has been recorded.');studentMocks()}catch(e){toast(e.message,false)}}
-async function studentResult(){
-let terms=await q('school_terms');let scores=await q('school_scores','*',[{op:'eq',col:'student_id',val:A.user.id}]);let releases=await q('school_releases');let subjects=await q('school_subjects');let releasedTerms=terms.filter(t=>releases.some(r=>r.term_id===t.id&&r.published));
-el('content').innerHTML=releasedTerms.length?releasedTerms.map(t=>{let ss=scores.filter(x=>x.term_id===t.id);return `<div class="card"><h3>${esc(t.name)} — ${esc(t.session)}</h3><div class="table-wrap"><table class="table"><tr><th>Subject</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>Exam</th><th>Total</th><th>Grade</th><th>Subject Pos.</th></tr>${ss.map(x=>{let su=subjects.find(y=>y.id===x.subject_id);return `<tr><td>${esc(su?.name)}</td><td>${x.test1||0}</td><td>${x.test2||0}</td><td>${x.test3||0}</td><td>${x.test4||0}</td><td>${x.exam||0}</td><td>${x.total||0}</td><td>${x.grade||''}</td><td>${x.position||''}</td></tr>`}).join('')}</table></div><button class="btn primary" onclick="printStudentResult('${t.id}')">Print result</button></div>`}).join(''):`<div class="card"><h3>No published result</h3><p>Your result will appear here only when the school administrator publishes it.</p></div>`}
-async function printStudentResult(termId){
-let t=await one('school_terms','*',[{op:'eq',col:'id',val:termId}]);let ss=await q('school_scores','*',[{op:'eq',col:'student_id',val:A.user.id},{op:'eq',col:'term_id',val:termId}]);let subs=await q('school_subjects');let ranks=await one('school_term_ranks','*',[{op:'eq',col:'student_id',val:A.user.id},{op:'eq',col:'term_id',val:termId}]);openModal('Print result',resultHTML(A.profile,t,ss,subs,ranks));setTimeout(()=>window.print(),300)}
-function resultHTML(s,t,ss,subs,rank){
-let total=ss.reduce((a,x)=>a+Number(x.total||0),0),average=subs.length?total/subs.length:0,bySubject={};ss.forEach(x=>bySubject[x.subject_id]=x);
-let rows=subs.map((su,i)=>{let x=bySubject[su.id]||{};let vals=['test1','test2','test3','test4','exam'].map(k=>x[k]===null||x[k]===undefined||x[k]===''?'':x[k]);let complete=vals.every(v=>v!=='');return `<tr><td>${i+1}</td><td>${esc(su.name)}</td><td>${vals[0]}</td><td>${vals[1]}</td><td>${vals[2]}</td><td>${vals[3]}</td><td>${vals[4]}</td><td>${x.total??''}</td><td>${x.grade||''}</td><td>${x.position||''}</td></tr>`}).join('');
-let uploaded=ss.filter(x=>subs.some(su=>su.id===x.subject_id)).length;
-return `<div class="result-preview printable"><div class="result-head"><h2>DE-TRINITY MONTESSORI EDUCATION CENTER</h2><div>TERMINAL ACADEMIC REPORT</div><small>${esc(t?.name||'')} • ${esc(t?.session||'')}</small></div>
-<div class="result-meta"><div><b>Name:</b> ${esc(s.name)}</div><div><b>Class:</b> ${esc(s.class_name)}</div><div><b>Sex:</b> ${esc(s.sex)}</div><div><b>Age:</b> ${esc(s.age)}</div><div><b>Parent:</b> ${esc(s.parent_name)}</div><div><b>House:</b> ${esc(s.house)}</div><div><b>Fees payable:</b> ₦${money(s.fees_payable)}</div><div><b>Admission No.:</b> ${esc(s.admission_no)}</div></div>
-<div class="result-status ${uploaded===subs.length&&subs.length?'ok':''}" style="margin:10px 0">${subs.length?`Result upload status: <b>${uploaded}/${subs.length} subjects</b> have score records for this term.`:'No subjects assigned to this student.'}</div>
-<table class="result-table"><tr><th>S/N</th><th>SUBJECT</th><th>Test 1<br>/10</th><th>Test 2<br>/10</th><th>Test 3<br>/10</th><th>Test 4<br>/10</th><th>Exam<br>/60</th><th>Total<br>/100</th><th>Grade</th><th>Subj. Pos.</th></tr>${rows}
-<tr><th colspan="7">TOTAL / AVERAGE</th><th>${total}</th><th colspan="2">${average.toFixed(2)}%</th></tr></table>
-<div class="result-footer"><div><div class="sig">Class Teacher<br>${esc(s.class_teacher||'Class Teacher')}</div></div><div><div class="sig">Headmistress<br>${esc(s.headmistress||'Headmistress')}</div></div><div><div class="sig">Principal/Headmaster<br>${esc(s.headmaster||'Headmaster')}</div></div></div>
-<div style="display:flex;justify-content:space-between;margin-top:20px;font-size:10px"><span>Official School Stamp: AUTO-GENERATED ON PRINT</span><span>Signature: AUTO-GENERATED ON PRINT</span><span>Printed: ${new Date().toLocaleString('en-GB')}</span></div></div><div class="actions no-print" style="margin-top:12px"><button class="btn primary" onclick="window.print()">🖨 Print full result</button></div>`}
-async function studentProfile(){el('content').innerHTML=`<div class="card">${profileForm(A.profile)}<button class="btn primary" onclick="updateOwnProfile()">Save changes</button></div>`}
-async function updateOwnProfile(){try{let p={id:A.user.id,name:el('f_name').value,class_name:el('f_class').value,sex:el('f_sex').value,age:el('f_age').value,parent_name:el('f_parent').value,house:el('f_house').value,class_teacher:el('f_teacher').value,headmistress:el('f_headmistress').value,headmaster:el('f_headmaster').value,fees_payable:Number(el('f_fees').value||0),admission_no:el('f_adm').value};await up('school_profiles',p);Object.assign(A.profile,p);toast('Profile updated')}catch(e){toast(e.message,false)}}
-
-function openModal(title,body){let m=document.createElement('div');m.className='modal';m.id='modal';m.innerHTML=`<div class="modalbox"><button class="close no-print" onclick="closeModal()">✕</button><h2 class="no-print">${esc(title)}</h2><div>${body}</div></div>`;document.body.appendChild(m)}
-function closeModal(){el('modal')?.remove()}
-boot();
+/* ============================================================
+   BOOT
+   ============================================================ */
+(async function boot(){
+  try {
+    const { data: { session: authSession } } = await sb.auth.getSession();
+    const local = loadSession();
+    if (authSession) {
+      saveSession({ role: 'admin' });
+      adminHome();
+    } else if (local?.role === 'student') {
+      studentHome();
+    } else {
+      clearSession();
+      loginScreen();
+    }
+    clearTimeout(window.__bootSlowTimer);
+    const bl = document.getElementById('bootLoader');
+    if (bl) bl.remove();
+  } catch (e) {
+    clearTimeout(window.__bootSlowTimer);
+    const bl = document.getElementById('bootLoader');
+    if (bl) {
+      bl.classList.add('slow');
+      document.getElementById('bootLoaderMsg').textContent = 'Something went wrong while starting the app. Please retry.';
+    }
+    console.error('Boot error:', e);
+  }
+})();
 </script>
 </body>
 </html>
