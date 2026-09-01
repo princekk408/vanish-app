@@ -36,6 +36,8 @@ const money=n=>Number(n||0).toLocaleString('en-NG',{minimumFractionDigits:2});
 const toast=(m,good=true)=>{let x=document.getElementById('toast');x.textContent=m;x.classList.remove('hidden');x.style.background=good?'#101828':'#b42318';setTimeout(()=>x.classList.add('hidden'),3000)};
 const el=id=>document.getElementById(id);
 const today=()=>new Date().toISOString().slice(0,10);
+// WAEC grading is calculated in JavaScript from the /100 subject total.
+// No database query is required when a score is graded.
 function grade(s){s=Number(s||0);if(s>=75)return'A1';if(s>=70)return'B2';if(s>=65)return'B3';if(s>=60)return'C4';if(s>=55)return'C5';if(s>=50)return'C6';if(s>=45)return'D7';if(s>=40)return'E8';return'F9'}
 function avg(nums){let a=nums.filter(x=>x!==null&&x!==undefined&&!Number.isNaN(Number(x))).map(Number);return a.length?a.reduce((x,y)=>x+y,0)/a.length:0}
 function fmtDate(x){return x?new Date(x).toLocaleDateString('en-GB'):''}
@@ -61,14 +63,75 @@ function fatal(e){document.getElementById('root').innerHTML='<div class="login">
 function login(){
 document.getElementById('root').innerHTML=`<div class="login"><div class="loginbox">
 <div class="card"><div class="brandmark">🏫 School Result Manager</div><p class="muted">Results • Mock Tests • Class Ranking • Printing</p>
-<div class="tabs"><button class="tab active" onclick="loginTab('signin')">Sign in</button><button class="tab" onclick="loginTab('signup')">Create account</button></div>
+<div class="tabs">
+<button class="tab active" onclick="loginTab('admin')">Admin Login</button>
+<button class="tab" onclick="loginTab('student')">Student Login</button>
+</div>
 <div id="authbox"></div></div></div></div>`;loginTab('signin')}
 function loginTab(mode){
-document.querySelectorAll('.tabs .tab').forEach((b,i)=>b.classList.toggle('active',(mode==='signin'?i===0:i===1)));
-el('authbox').innerHTML=mode==='signin'?`<div class="grid"><div class="field"><label>Email</label><input id="email" type="email"></div><div class="field"><label>Password</label><input id="pass" type="password"></div><button class="btn primary" onclick="signin()">Sign in</button></div>`:
-`<div class="grid"><div class="field"><label>Email</label><input id="email" type="email"></div><div class="field"><label>Password</label><input id="pass" type="password" minlength="6"></div><div class="notice small">New accounts are students by default. An existing admin can change the role in the Admin → Users area.</div><button class="btn primary" onclick="signup()">Create account</button></div>`}
-async function signin(){try{let {error}=await sb.auth.signInWithPassword({email:el('email').value,password:el('pass').value});if(error)throw error;location.reload()}catch(e){toast(e.message,false)}}
-async function signup(){try{let {data,error}=await sb.auth.signUp({email:el('email').value,password:el('pass').value});if(error)throw error;if(!data.user)throw Error('Could not create account');A.user=data.user;firstProfile()}catch(e){toast(e.message,false)}}
+  document.querySelectorAll('.tabs .tab').forEach((b,i)=>{
+    b.classList.toggle('active',(mode==='admin'?i===0:i===1));
+  });
+
+  if(mode==='admin'){
+    el('authbox').innerHTML=`
+      <div class="grid">
+        <div class="field"><label>Admin email</label>
+          <input id="admin_email" type="email" value="ogonorprincebright@gmail.com" autocomplete="username">
+        </div>
+        <div class="field"><label>Admin password</label>
+          <input id="admin_pass" type="password" autocomplete="current-password">
+        </div>
+        <button class="btn primary" onclick="adminLogin()">Login as Admin</button>
+      </div>`;
+  }else{
+    el('authbox').innerHTML=`
+      <div class="grid">
+        <div class="field"><label>Student name</label>
+          <input id="student_name" type="text" placeholder="Enter your full name">
+        </div>
+        <div class="field"><label>Password</label>
+          <input id="student_pass" type="password" autocomplete="current-password">
+        </div>
+        <button class="btn primary" onclick="studentLogin()">Login as Student</button>
+        <div class="notice small">Your administrator will provide your password. Students only see published mocks and released results.</div>
+      </div>`;
+  }
+}
+
+async function adminLogin(){
+  try{
+    const email=el('admin_email').value.trim();
+    const password=el('admin_pass').value;
+    if(email!=='ogonorprincebright@gmail.com')
+      throw Error('Invalid admin email.');
+    const {error}=await sb.auth.signInWithPassword({email,password});
+    if(error)throw error;
+    location.reload();
+  }catch(e){toast(e.message,false)}
+}
+
+async function studentLogin(){
+  try{
+    const name=el('student_name').value.trim();
+    const password=el('student_pass').value;
+    if(!name||!password)throw Error('Enter your name and password.');
+
+    // Student credentials are managed in school_profiles.
+    // The password is checked against the profile's stored password field.
+    const profiles=await q('school_profiles','*',[{op:'ilike',col:'name',val:name}]);
+    const p=profiles.find(x=>String(x.name||'').toLowerCase()===name.toLowerCase());
+
+    if(!p)throw Error('Student not found.');
+    if(p.role==='admin')throw Error('Use the Admin Login.');
+    if(String(p.password||'')!==password)throw Error('Incorrect password.');
+
+    A.user={id:p.id,email:p.email||null};
+    A.profile=p;
+    student();
+  }catch(e){toast(e.message,false)}
+}
+
 function firstProfile(){
 document.getElementById('root').innerHTML=`<div class="login"><div class="loginbox card"><h2>Student profile</h2><p class="muted">Fill this once. Admins can later complete or edit the school details.</p>
 ${profileForm()}
@@ -105,7 +168,7 @@ shell('Admin Panel','Manage students, classes, subjects, terms, scores, mocks an
 <button onclick="adminPage('results',this)">📄 Life Results</button>
 <button onclick="adminPage('publish',this)">🔓 Publish Results</button>
 <button onclick="adminPage('users',this)">👤 Users</button>
-<button onclick="adminPage('setup',this)">⚙️ Setup / SQL</button>`);
+<button onclick="adminPage('setup',this)">⚙️ Setup / Database</button>`);
 adminPage('dashboard',document.querySelector('.side button'))}
 async function adminPage(p,b){
 document.querySelectorAll('.side button').forEach(x=>x.classList.remove('active'));b?.classList.add('active');A.page=p;
