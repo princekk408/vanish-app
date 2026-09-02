@@ -727,6 +727,25 @@ async function parseBulkScores(subjectId){
 }
 
 /* ---------- BROADSHEET (class + term scoped) ---------- */
+// Supabase/PostgREST may cap a single SELECT response at 1,000 rows.
+// A full class can easily exceed that (e.g. 24 students × 9 subjects × 5
+// components = 1,080 score rows), so the broadsheet must paginate.
+async function fetchAllBroadsheetScores(subjectIds, studentIds){
+  const PAGE_SIZE = 1000;
+  const all = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await sb.from('rs_scores').select('*')
+      .in('subject_id', subjectIds)
+      .in('student_id', studentIds)
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    const page = data || [];
+    all.push(...page);
+    if (page.length < PAGE_SIZE) break;
+  }
+  return all;
+}
+
 async function computeBroadsheet(classId, termId){
   const [subjects, students, comps] = await Promise.all([
     fetchSubjects(classId), fetchStudents(classId), fetchComponents(termId)
@@ -734,9 +753,10 @@ async function computeBroadsheet(classId, termId){
   const maxPerSubject = comps.reduce((sum,c) => sum + Number(c.max_score), 0) || 100;
   let scores = [];
   if (subjects.length && students.length) {
-    const { data } = await sb.from('rs_scores').select('*')
-      .in('subject_id', subjects.map(s=>s.id)).in('student_id', students.map(s=>s.id));
-    scores = data || [];
+    scores = await fetchAllBroadsheetScores(
+      subjects.map(s=>s.id),
+      students.map(s=>s.id)
+    );
   }
   const scale = (await sb.from('rs_grading_scale').select('*').order('sort_order')).data || [];
   const gradeOf = total => scale.find(r => total >= r.min_score && total <= r.max_score) || { grade:'—', remark:'—' };
