@@ -629,6 +629,7 @@ async function adminScores(subjectId){
     const { data } = await sb.from('rs_scores').select('*').eq('subject_id', subjectId).in('student_id', students.map(s=>s.id));
     (data||[]).forEach(sc => { scoresMap[sc.student_id+'_'+sc.component_id] = sc; });
   }
+  const incompleteNames = students.filter(st => !comps.every(c => scoresMap[st.id+'_'+c.id] && scoresMap[st.id+'_'+c.id].score != null)).map(st=>st.name);
   const body = `
     <div class="card">
       <div class="top"><h2>✍️ Score Entry</h2></div>
@@ -638,6 +639,10 @@ async function adminScores(subjectId){
         </select>
       </div>
       ${(!subjectId || students.length===0 || comps.length===0) ? `<p class="muted">Add subjects, students, and components first.</p>` : `
+      <div class="banner ${incompleteNames.length===0?'success':'error'}" style="margin-bottom:10px;">
+        ${incompleteNames.length===0 ? `✅ All ${students.length} students have complete scores for this subject.`
+          : `⚠️ ${incompleteNames.length} of ${students.length} students are missing at least one score: ${esc(incompleteNames.join(', '))}`}
+      </div>
       <div style="overflow:auto;">
       <table>
         <thead><tr><th>Student</th>${comps.map(c=>`<th>${esc(c.name)}<br><span class="muted" style="text-transform:none;">/${c.max_score}</span></th>`).join('')}<th>Total</th></tr></thead>
@@ -656,7 +661,15 @@ async function adminScores(subjectId){
       </table>
       </div>
       <button class="btn" style="margin-top:14px;" onclick="saveAllScores('${subjectId}')">💾 Save All Scores</button>
-      <div id="scoreSaveMsg"></div>`}
+      <div id="scoreSaveMsg"></div>
+
+      <div class="card" style="background:var(--surface-2);margin-top:18px;">
+        <h3 style="margin-bottom:8px;">📋 Bulk Score Parser</h3>
+        <p class="muted" style="margin-bottom:8px;">Paste one student per line: <strong>Name, ${comps.map(c=>c.name).join(', ')}</strong> — in that exact order, comma or space separated. Names are matched to students in this class (case-insensitive).</p>
+        <textarea id="bulkScoreText" rows="6" placeholder="John Okafor, 8, 7, 9, 6, 55&#10;Mary Bright, 9, 9, 10, 8, 60"></textarea>
+        <button class="btn sm" style="margin-top:8px;" onclick="parseBulkScores('${subjectId}')">⚡ Parse & Save</button>
+        <div id="bulkScoreMsg"></div>
+      </div>`}
     </div>`;
   adminShell(body, 'scores');
 }
@@ -676,8 +689,41 @@ async function saveAllScores(subjectId){
   if (rows.length === 0) { msg.innerHTML = `<div class="banner info">Nothing to save.</div>`; return; }
   const { error } = await sb.from('rs_scores').upsert(rows, { onConflict: 'student_id,subject_id,component_id' });
   if (error) { msg.innerHTML = `<div class="banner error">${esc(error.message)}</div>`; return; }
-  toast('Scores saved','success');
+  toast(`Saved ${rows.length} score entries`,'success');
   adminScores(subjectId);
+}
+async function parseBulkScores(subjectId){
+  const msg = $('bulkScoreMsg');
+  const text = $('bulkScoreText').value.trim();
+  if (!text) { msg.innerHTML = `<div class="banner error">Paste some data first.</div>`; return; }
+  msg.innerHTML = `<div class="banner info">Parsing…</div>`;
+  const [students, comps] = await Promise.all([fetchStudents(AState.classId), fetchComponents(AState.termId)]);
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const rows = []; const errors = [];
+  for (const line of lines) {
+    const parts = line.split(/[,\t]+/).map(p=>p.trim()).filter(Boolean);
+    if (parts.length < 2) { errors.push(`"${line}" — couldn't split into name + scores`); continue; }
+    const namePart = parts[0];
+    const scoreParts = parts.slice(1);
+    const student = students.find(s => s.name.toLowerCase() === namePart.toLowerCase());
+    if (!student) { errors.push(`"${namePart}" — no matching student in this class`); continue; }
+    if (scoreParts.length !== comps.length) { errors.push(`"${namePart}" — expected ${comps.length} scores, got ${scoreParts.length}`); continue; }
+    let lineOk = true;
+    const lineRows = comps.map((c, i) => {
+      const val = parseFloat(scoreParts[i]);
+      if (isNaN(val) || val < 0 || val > c.max_score) { errors.push(`"${namePart}" — invalid score "${scoreParts[i]}" for ${c.name} (max ${c.max_score})`); lineOk = false; }
+      return { student_id: student.id, subject_id: subjectId, component_id: c.id, score: val, source: 'manual' };
+    });
+    if (lineOk) rows.push(...lineRows);
+  }
+  if (rows.length === 0) { msg.innerHTML = `<div class="banner error">Nothing valid to save.${errors.length?'<br>'+esc(errors.join('<br>')):''}</div>`; return; }
+  const { error } = await sb.from('rs_scores').upsert(rows, { onConflict: 'student_id,subject_id,component_id' });
+  if (error) { msg.innerHTML = `<div class="banner error">${esc(error.message)}</div>`; return; }
+  const studentsCovered = new Set(rows.map(r=>r.student_id)).size;
+  msg.innerHTML = `<div class="banner success">Saved scores for ${studentsCovered} student(s).</div>` +
+    (errors.length ? `<div class="banner error" style="margin-top:6px;">${errors.length} line(s) skipped:<br>${esc(errors.join('<br>'))}</div>` : '');
+  toast(`Bulk saved ${studentsCovered} student(s)`,'success');
+  setTimeout(()=>adminScores(subjectId), 1200);
 }
 
 /* ---------- BROADSHEET (class + term scoped) ---------- */
@@ -912,11 +958,37 @@ async function showPrintPage(studentId, classId, termId, backFnName){
 
   const photoHtml = st.photo_url ? `<div class="rsPhotoBox"><img src="${esc(st.photo_url)}"></div>` : `<div style="width:78px;"></div>`;
 
+  // Scale everything up when there are fewer subjects, so the sheet still fills the A4 page
+  const scale = Math.max(0.75, Math.min(2.3, 12 / Math.max(subjects.length, 4)));
+  const scaleCSS = `
+    #printArea{font-size:${(10*scale).toFixed(1)}px;}
+    #printArea h1{font-size:${(17*scale).toFixed(1)}px;}
+    #printArea .sub{font-size:${(10*scale).toFixed(1)}px;}
+    #printArea .rsPhotoBox{width:${Math.round(78*Math.min(scale,1.7))}px;height:${Math.round(92*Math.min(scale,1.7))}px;}
+    #printArea .rsBanner{padding:${(3*scale).toFixed(1)}px;font-size:${(11*scale).toFixed(1)}px;}
+    #printArea .rsSessionBar{padding:${(2*scale).toFixed(1)}px;font-size:${(10*scale).toFixed(1)}px;}
+    #printArea .infoGrid{font-size:${(10.5*scale).toFixed(1)}px;margin:${(6*scale).toFixed(1)}px 0;gap:${(1*scale).toFixed(1)}px 20px;}
+    #printArea table{font-size:${(9.5*scale).toFixed(1)}px;}
+    #printArea th{font-size:${(8*scale).toFixed(1)}px;padding:${(2*scale).toFixed(1)}px ${(2*scale).toFixed(1)}px;}
+    #printArea td{padding:${(1.8*scale).toFixed(1)}px ${(2.5*scale).toFixed(1)}px;font-size:${(9.5*scale).toFixed(1)}px;}
+    #printArea .rsBoxRow{gap:${(6*scale).toFixed(1)}px;margin-top:${(6*scale).toFixed(1)}px;}
+    #printArea .rsBox h4{font-size:${(9*scale).toFixed(1)}px;padding:${(2*scale).toFixed(1)}px ${(6*scale).toFixed(1)}px;}
+    #printArea .rsBox .rsBoxBody{padding:${(3*scale).toFixed(1)}px ${(6*scale).toFixed(1)}px;font-size:${(9.5*scale).toFixed(1)}px;}
+    #printArea .rsGradeTable{font-size:${(8.3*scale).toFixed(1)}px;}
+    #printArea .rsRemarkGrid{gap:${(6*scale).toFixed(1)}px;margin-top:${(6*scale).toFixed(1)}px;}
+    #printArea .remarkBox h4{font-size:${(8.5*scale).toFixed(1)}px;padding:${(2*scale).toFixed(1)}px ${(6*scale).toFixed(1)}px;}
+    #printArea .remarkEdit{min-height:${(13*scale).toFixed(1)}px;padding:${(3*scale).toFixed(1)}px ${(6*scale).toFixed(1)}px;font-size:${(9.5*scale).toFixed(1)}px;}
+    #printArea .sigline{font-size:${(9.5*scale).toFixed(1)}px;}
+    #printArea .stampBox{height:${Math.round(44*scale)}px;font-size:${(9*scale).toFixed(1)}px;}
+    #printArea{padding:${(7*scale).toFixed(1)}mm ${(9*scale).toFixed(1)}mm;}
+  `;
+
   app.innerHTML = `
     <div class="no-print" style="padding:14px;display:flex;gap:10px;justify-content:center;background:var(--surface);border-bottom:1px solid var(--border);">
       <button class="btn outline" onclick="${backFnName}()">← Back</button>
       <button class="btn gold" onclick="window.print()">🖨️ Print</button>
     </div>
+    <style>${scaleCSS}</style>
     <div style="padding:20px 10px;">
       <div id="printArea" class="resultSheet">
         <div class="rsHead">
@@ -1066,30 +1138,60 @@ async function adminMocks(){
   ]);
   const body = `
     <div class="card">
-      <div class="top"><h2>📝 Schedule a Mock</h2></div>
+      <div class="top"><h2>📝 Schedule a Test / Exam</h2></div>
       <div class="grid2">
         <div class="field"><label>Title</label><input id="mockTitle" placeholder="e.g. Mock Test — Mathematics"></div>
+        <div class="field"><label>Kind</label>
+          <select id="mockKind" onchange="onMockKindChange()">
+            <option value="test">Test (score shown right after submission)</option>
+            <option value="exam">Exam (score hidden until you release it)</option>
+          </select>
+        </div>
         <div class="field"><label>Subject</label><select id="mockSubject">${subjects.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
         <div class="field"><label>Fills score slot</label><select id="mockComponent">${comps.map(c=>`<option value="${c.id}">${esc(c.name)} (/${c.max_score})</option>`).join('')}</select></div>
         <div class="field"><label>Duration (minutes)</label><input id="mockDuration" type="number" value="30"></div>
         <div class="field"><label>Opens at</label><input id="mockStart" type="datetime-local"></div>
         <div class="field"><label>Closes at</label><input id="mockEnd" type="datetime-local"></div>
+        <div class="field" id="mockReleaseField" style="display:none;"><label>Exam review release (optional)</label><input id="mockRelease" type="datetime-local"></div>
+      </div>
+      <div class="flex" style="margin:6px 0 14px;">
+        <label style="display:flex;align-items:center;gap:6px;text-transform:none;font-weight:600;color:var(--ink);"><input type="checkbox" id="mockShowResult" checked style="width:auto;"> Show score immediately after submission</label>
+        <label style="display:flex;align-items:center;gap:6px;text-transform:none;font-weight:600;color:var(--ink);"><input type="checkbox" id="mockShowCalc" style="width:auto;"> Allow calculator during this test/exam</label>
       </div>
       <h3 style="margin:14px 0 8px;">Questions</h3>
       <div id="mockQuestionsArea"></div>
       <button class="btn sm outline" onclick="addMockQuestionDraft()">+ Add Question</button>
-      <div style="margin-top:14px;"><button class="btn" onclick="createMock()">📅 Schedule Mock</button></div>
+
+      <div class="card" style="background:var(--surface-2);margin-top:14px;">
+        <h3 style="margin-bottom:6px;">📋 Bulk Question Parser</h3>
+        <p class="muted" style="margin-bottom:8px;">Paste questions in this format (blank line between questions):</p>
+        <pre class="muted" style="white-space:pre-wrap;font-size:11.5px;background:var(--surface);padding:8px;border-radius:8px;">Q: What is the capital of Nigeria?
+A) Lagos
+B) Abuja
+C) Kano
+D) Ibadan
+Answer: B
+Marks: 2
+Explanation: Abuja became Nigeria's capital in 1991.</pre>
+        <textarea id="bulkQuestionText" rows="8" placeholder="Paste questions here…"></textarea>
+        <button class="btn sm" style="margin-top:8px;" onclick="parseBulkQuestions()">⚡ Parse & Add Questions</button>
+        <div id="bulkQMsg"></div>
+      </div>
+
+      <div style="margin-top:14px;"><button class="btn" onclick="createMock()">📅 Schedule</button></div>
       <div id="mockCreateMsg"></div>
     </div>
     <div class="card">
-      <h3 style="margin-bottom:10px;">Scheduled mocks for this class</h3>
+      <h3 style="margin-bottom:10px;">Scheduled tests/exams for this class</h3>
       ${mocks.length===0 ? `<p class="muted">None yet.</p>` : mocks.map(m => `
         <div class="list-item" style="align-items:flex-start;">
           <div>
-            <strong>${esc(m.title)}</strong><br>
-            <span class="muted">${fmtDateTime(m.start_time)} → ${fmtDateTime(m.end_time)} · ${m.duration_minutes} min</span>
+            <strong>${esc(m.title)}</strong> <span class="pill ${m.kind==='exam'?'red':'gold'}">${m.kind==='exam'?'Exam':'Test'}</span><br>
+            <span class="muted">${fmtDateTime(m.start_time)} → ${fmtDateTime(m.end_time)} · ${m.duration_minutes} min</span><br>
+            ${m.kind==='exam' ? `<span class="muted">Review release: ${m.result_release_at ? fmtDateTime(m.result_release_at) : 'not scheduled'}</span>` : ''}
           </div>
           <div class="flex">
+            ${m.kind==='exam' ? `<button class="btn sm outline" onclick="setMockRelease('${m.id}')">Set Release</button>` : ''}
             <button class="btn sm outline" onclick="viewMockAttempts('${m.id}')">Attempts</button>
             <button class="btn sm danger" onclick="deleteMock('${m.id}')">Delete</button>
           </div>
@@ -1100,8 +1202,21 @@ async function adminMocks(){
   window._mockDraftQuestions = [];
   renderMockQuestionDrafts();
 }
+function onMockKindChange(){
+  const kind = $('mockKind').value;
+  $('mockReleaseField').style.display = kind === 'exam' ? 'block' : 'none';
+  $('mockShowResult').checked = kind !== 'exam';
+}
+async function setMockRelease(mockId){
+  const val = prompt('Enter release date & time (e.g. 2026-09-15 18:00):');
+  if (!val) return;
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return toast('Could not understand that date/time','error');
+  await sb.from('rs_mocks').update({ result_release_at: d.toISOString() }).eq('id', mockId);
+  toast('Release time set','success'); adminMocks();
+}
 function addMockQuestionDraft(){
-  window._mockDraftQuestions.push({ id: uid(), q:'', options:['','','',''], correct:0 });
+  window._mockDraftQuestions.push({ id: uid(), q:'', options:['','','',''], correct:0, marks:1, explanation:'' });
   renderMockQuestionDrafts();
 }
 function renderMockQuestionDrafts(){
@@ -1109,20 +1224,59 @@ function renderMockQuestionDrafts(){
   if (!area) return;
   area.innerHTML = window._mockDraftQuestions.map((q,i) => `
     <div class="qbox">
-      <div class="field"><label>Question ${i+1}</label><input value="${esc(q.q)}" onchange="updateDraftQ('${q.id}','q',this.value)"></div>
+      <div class="top"><h3 style="margin:0;">Question ${i+1}</h3><span class="pill">${q.marks||1} mark(s)</span></div>
+      <div class="field"><label>Question</label><input value="${esc(q.q)}" onchange="updateDraftQ('${q.id}','q',this.value)"></div>
       <div class="grid2">
         ${q.options.map((opt,oi) => `
           <div class="field">
-            <label><input type="radio" name="correct_${q.id}" ${q.correct===oi?'checked':''} onchange="updateDraftQ('${q.id}','correct',${oi})"> Option ${oi+1} ${q.correct===oi?'(correct)':''}</label>
+            <label><input type="radio" name="correct_${q.id}" ${q.correct===oi?'checked':''} onchange="updateDraftQ('${q.id}','correct',${oi})"> Option ${String.fromCharCode(65+oi)} ${q.correct===oi?'✅ correct':''}</label>
             <input value="${esc(opt)}" onchange="updateDraftOpt('${q.id}',${oi},this.value)">
           </div>`).join('')}
       </div>
+      <div class="grid2">
+        <div class="field"><label>Marks</label><input type="number" min="1" value="${q.marks||1}" onchange="updateDraftQ('${q.id}','marks',parseFloat(this.value)||1)"></div>
+      </div>
+      <div class="field"><label>Explanation (shown when exam review is released)</label><textarea rows="2" onchange="updateDraftQ('${q.id}','explanation',this.value)">${esc(q.explanation||'')}</textarea></div>
       <button class="btn sm danger" onclick="removeDraftQ('${q.id}')">Remove question</button>
     </div>`).join('') || `<p class="muted">No questions added yet.</p>`;
 }
-function updateDraftQ(id, field, val){ const q = window._mockDraftQuestions.find(x=>x.id===id); if (q) q[field] = val; }
+function updateDraftQ(id, field, val){ const q = window._mockDraftQuestions.find(x=>x.id===id); if (q) q[field] = val; if(field==='marks') renderMockQuestionDrafts(); }
 function updateDraftOpt(id, idx, val){ const q = window._mockDraftQuestions.find(x=>x.id===id); if (q) q.options[idx] = val; }
 function removeDraftQ(id){ window._mockDraftQuestions = window._mockDraftQuestions.filter(x=>x.id!==id); renderMockQuestionDrafts(); }
+
+function parseBulkQuestions(){
+  const msg = $('bulkQMsg');
+  const text = $('bulkQuestionText').value.trim();
+  if (!text) { msg.innerHTML = `<div class="banner error">Paste some questions first.</div>`; return; }
+  const blocks = text.split(/\n\s*\n/).map(b=>b.trim()).filter(Boolean);
+  let added = 0; const errors = [];
+  blocks.forEach((block, bi) => {
+    const lines = block.split('\n').map(l=>l.trim()).filter(Boolean);
+    const qLine = lines.find(l => /^q[:.]/i.test(l));
+    if (!qLine) { errors.push(`Block ${bi+1}: no "Q:" line found`); return; }
+    const qText = qLine.replace(/^q[:.]\s*/i, '');
+    const options = ['','','',''];
+    let correct = null, marks = 1, explanation = '';
+    lines.forEach(l => {
+      const optMatch = l.match(/^([A-D])[).:]\s*(.*)$/i);
+      if (optMatch) { options[optMatch[1].toUpperCase().charCodeAt(0)-65] = optMatch[2].trim(); return; }
+      const ansMatch = l.match(/^answer[:.]\s*([A-D])/i);
+      if (ansMatch) { correct = ansMatch[1].toUpperCase().charCodeAt(0)-65; return; }
+      const marksMatch = l.match(/^marks?[:.]\s*(\d+(\.\d+)?)/i);
+      if (marksMatch) { marks = parseFloat(marksMatch[1]); return; }
+      const expMatch = l.match(/^explanation[:.]\s*(.*)$/i);
+      if (expMatch) { explanation = expMatch[1].trim(); return; }
+    });
+    if (!qText || options.some(o=>!o) || correct == null) {
+      errors.push(`Block ${bi+1}: missing question, an option (A-D), or Answer: line`); return;
+    }
+    window._mockDraftQuestions.push({ id: uid(), q: qText, options, correct, marks, explanation });
+    added++;
+  });
+  renderMockQuestionDrafts();
+  msg.innerHTML = `<div class="banner ${added>0?'success':'error'}">Added ${added} question(s).${errors.length ? '<br>'+esc(errors.join('<br>')) : ''}</div>`;
+  if (added>0) $('bulkQuestionText').value = '';
+}
 async function createMock(){
   const msg = $('mockCreateMsg');
   const title = $('mockTitle').value.trim();
@@ -1130,14 +1284,18 @@ async function createMock(){
   if (!title || !start || !end) { msg.innerHTML = `<div class="banner error">Fill title, opens-at and closes-at.</div>`; return; }
   const qs = window._mockDraftQuestions.filter(q => q.q.trim() && q.options.every(o=>o.trim()));
   if (qs.length === 0) { msg.innerHTML = `<div class="banner error">Add at least one complete question.</div>`; return; }
+  const kind = $('mockKind').value;
+  const release = $('mockRelease')?.value;
   const payload = {
     class_id: AState.classId, subject_id: $('mockSubject').value, component_id: $('mockComponent').value,
     title, questions: qs, start_time: new Date(start).toISOString(), end_time: new Date(end).toISOString(),
-    duration_minutes: parseInt($('mockDuration').value) || 30
+    duration_minutes: parseInt($('mockDuration').value) || 30,
+    kind, show_result: $('mockShowResult').checked, show_calculator: $('mockShowCalc').checked,
+    result_release_at: (kind==='exam' && release) ? new Date(release).toISOString() : null
   };
   const { error } = await sb.from('rs_mocks').insert(payload);
   if (error) { msg.innerHTML = `<div class="banner error">${esc(error.message)}</div>`; return; }
-  toast('Mock scheduled','success'); adminMocks();
+  toast('Scheduled','success'); adminMocks();
 }
 async function deleteMock(id){
   if (!confirm('Delete this mock and its attempts?')) return;
@@ -1152,8 +1310,8 @@ async function viewMockAttempts(mockId){
     <div class="card" style="margin-top:10px;background:var(--surface-2);">
       <h3>Attempts</h3>
       ${(!data || data.length===0) ? `<p class="muted">No attempts yet.</p>` : `
-      <table><thead><tr><th>Student</th><th>Score</th><th>Completed</th></tr></thead>
-      <tbody>${data.map(a=>`<tr><td>${esc(a.rs_students?.name||'—')}</td><td>${a.score}</td><td>${fmtDateTime(a.completed_at)}</td></tr>`).join('')}</tbody></table>`}
+      <table><thead><tr><th>Student</th><th>Score</th><th>Marks</th><th>Completed</th></tr></thead>
+      <tbody>${data.map(a=>`<tr><td>${esc(a.rs_students?.name||'—')}</td><td>${a.score}</td><td>${a.marks_earned??'—'}/${a.marks_possible??'—'}</td><td>${fmtDateTime(a.completed_at)}</td></tr>`).join('')}</tbody></table>`}
     </div>`;
 }
 
@@ -1163,54 +1321,194 @@ async function studentAvailableMocks(classId){
   const now = new Date();
   return (data||[]).filter(m => new Date(m.start_time) <= now && now <= new Date(m.end_time));
 }
+function shuffleArray(arr){
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
+}
+function shuffleQuestionSet(questions){
+  const shuffledQs = shuffleArray(questions);
+  return shuffledQs.map(q => {
+    const order = shuffleArray([0,1,2,3]);
+    const newOptions = order.map(oi => q.options[oi]);
+    const newCorrect = order.indexOf(q.correct);
+    return { q: q.q, options: newOptions, correct: newCorrect, marks: q.marks||1, explanation: q.explanation||'' };
+  });
+}
 async function studentTakeMock(mockId){
   const s = loadSession();
   const { data: mock } = await sb.from('rs_mocks').select('*').eq('id', mockId).maybeSingle();
   if (!mock) { toast('Mock not found','error'); return; }
   const { data: existing } = await sb.from('rs_mock_attempts').select('*').eq('mock_id', mockId).eq('student_id', s.id).maybeSingle();
-  if (existing) { toast('You already attempted this mock.','error'); studentHome(); return; }
+  if (existing) { toast('You already attempted this.','error'); studentHome(); return; }
   window._activeMock = mock;
-  window._mockAnswers = new Array(mock.questions.length).fill(null);
+  window._activeQuestions = shuffleQuestionSet(mock.questions);
+  window._mockAnswers = new Array(window._activeQuestions.length).fill(null);
+  window._mockTimeLeft = (mock.duration_minutes || 30) * 60;
+  clearInterval(window._mockTimerHandle);
+  window._mockTimerHandle = setInterval(mockTimerTick, 1000);
   renderMockQuestion(0);
+}
+function mockTimerTick(){
+  window._mockTimeLeft--;
+  const el = $('mockTimerDisplay');
+  if (el) {
+    const m = Math.floor(window._mockTimeLeft/60), sec = window._mockTimeLeft%60;
+    el.textContent = `${m}:${String(sec).padStart(2,'0')}`;
+    el.style.color = window._mockTimeLeft <= 60 ? '#ffb3b3' : '#fff';
+  }
+  if (window._mockTimeLeft <= 0) {
+    clearInterval(window._mockTimerHandle);
+    toast("Time's up! Auto-submitting…","error");
+    submitMock();
+  }
+}
+function toggleMockCalculator(show){
+  let el = $('mockCalcOverlay');
+  if (show) {
+    if (el) return;
+    const div = document.createElement('div');
+    div.id = 'mockCalcOverlay';
+    div.style.cssText = 'position:fixed;bottom:70px;right:16px;z-index:500;background:#1a1425;border-radius:14px;padding:10px;box-shadow:var(--shadow-lg);width:210px;';
+    div.innerHTML = `
+      <input id="calcDisplay" readonly style="width:100%;margin-bottom:6px;text-align:right;font-size:18px;background:#fff;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
+        ${['7','8','9','/','4','5','6','*','1','2','3','-','0','.','C','+'].map(b=>`<button class="btn sm" style="padding:8px 0;" onclick="calcPress('${b}')">${b}</button>`).join('')}
+        <button class="btn sm gold" style="grid-column:span 4;" onclick="calcPress('=')">=</button>
+      </div>
+      <button class="btn sm outline" style="width:100%;margin-top:6px;" onclick="toggleMockCalculator(false)">Close</button>`;
+    document.body.appendChild(div);
+  } else if (el) { el.remove(); }
+}
+function calcPress(b){
+  const disp = $('calcDisplay');
+  if (!disp) return;
+  if (b === 'C') { disp.value = ''; return; }
+  if (b === '=') {
+    if (!/^[0-9+\-*/.\s]+$/.test(disp.value)) { disp.value = 'Error'; return; }
+    try { disp.value = Function('"use strict";return ('+disp.value+')')(); } catch(e) { disp.value = 'Error'; }
+    return;
+  }
+  disp.value += b;
 }
 function renderMockQuestion(idx){
   const mock = window._activeMock;
-  const q = mock.questions[idx];
+  const questions = window._activeQuestions;
+  const q = questions[idx];
+  const answeredCount = window._mockAnswers.filter(a=>a!=null).length;
+  const m = Math.floor(window._mockTimeLeft/60), sec = window._mockTimeLeft%60;
   app.innerHTML = `
-    <div class="content" style="max-width:600px;">
-      <div class="card">
-        <div class="top"><h2>📝 ${esc(mock.title)}</h2><span class="pill gold">Q${idx+1}/${mock.questions.length}</span></div>
-        <h3 style="margin-bottom:12px;">${esc(q.q)}</h3>
-        ${q.options.map((opt,oi) => `
-          <label class="list-item" style="cursor:pointer;">
-            <span><input type="radio" name="mockAns" ${window._mockAnswers[idx]===oi?'checked':''} onchange="window._mockAnswers[${idx}]=${oi}"> ${esc(opt)}</span>
-          </label>`).join('')}
-        <div class="flex" style="margin-top:16px;justify-content:space-between;">
-          ${idx>0 ? `<button class="btn outline" onclick="renderMockQuestion(${idx-1})">← Previous</button>` : `<span></span>`}
-          ${idx < mock.questions.length-1
-            ? `<button class="btn" onclick="renderMockQuestion(${idx+1})">Next →</button>`
-            : `<button class="btn gold" onclick="submitMock()">✅ Submit Mock</button>`}
-        </div>
+    <div class="topbar">
+      <span class="brand">📝 ${esc(mock.title)}</span>
+      <span id="mockTimerDisplay" style="font-family:'Space Mono',monospace;font-weight:700;font-size:16px;">${m}:${String(sec).padStart(2,'0')}</span>
+    </div>
+    <div class="content" style="max-width:640px;">
+      <div class="flex" style="overflow-x:auto;padding:10px 0;gap:6px;">
+        ${questions.map((qq,i) => `
+          <button onclick="renderMockQuestion(${i})" style="min-width:34px;height:34px;border-radius:50%;border:2px solid ${i===idx?'var(--accent)':'var(--border)'};background:${window._mockAnswers[i]!=null?'var(--primary)':'#fff'};color:${window._mockAnswers[i]!=null?'#fff':'var(--ink)'};font-weight:700;font-size:12.5px;flex-shrink:0;">${i+1}</button>`).join('')}
       </div>
-    </div>`;
+      <div class="card">
+        <div class="top"><span class="pill gold">Question ${idx+1} of ${questions.length}</span><span class="pill">${answeredCount}/${questions.length} answered</span></div>
+        <h3 style="margin:10px 0 14px;line-height:1.4;">${esc(q.q)}</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+        ${q.options.map((opt,oi) => `
+          <div onclick="selectMockAnswer(${idx},${oi})" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:1.5px solid ${window._mockAnswers[idx]===oi?'var(--primary)':'var(--border)'};background:${window._mockAnswers[idx]===oi?'var(--surface-2)':'#fff'};cursor:pointer;">
+            <span style="width:26px;height:26px;border-radius:50%;background:${window._mockAnswers[idx]===oi?'var(--primary)':'var(--surface-2)'};color:${window._mockAnswers[idx]===oi?'#fff':'var(--ink)'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;flex-shrink:0;">${String.fromCharCode(65+oi)}</span>
+            <span>${esc(opt)}</span>
+          </div>`).join('')}
+        </div>
+        <div class="flex" style="margin-top:18px;justify-content:space-between;">
+          ${idx>0 ? `<button class="btn outline" onclick="renderMockQuestion(${idx-1})">← Previous</button>` : `<span></span>`}
+          ${idx < questions.length-1
+            ? `<button class="btn" onclick="renderMockQuestion(${idx+1})">Next →</button>`
+            : `<button class="btn gold" onclick="confirmSubmitMock()">✅ Submit</button>`}
+        </div>
+        ${idx===questions.length-1 ? '' : `<button class="btn sm outline" style="width:100%;margin-top:10px;" onclick="confirmSubmitMock()">Submit now</button>`}
+      </div>
+    </div>
+    ${mock.show_calculator ? `<button class="btn gold" style="position:fixed;bottom:16px;right:16px;border-radius:50%;width:52px;height:52px;font-size:20px;z-index:400;" onclick="toggleMockCalculator(true)">🧮</button>` : ''}
+  `;
+}
+function selectMockAnswer(idx, oi){ window._mockAnswers[idx] = oi; renderMockQuestion(idx); }
+function confirmSubmitMock(){
+  const unanswered = window._mockAnswers.filter(a=>a==null).length;
+  if (unanswered > 0 && !confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`)) return;
+  submitMock();
 }
 async function submitMock(){
+  clearInterval(window._mockTimerHandle);
+  toggleMockCalculator(false);
   const mock = window._activeMock;
+  const questions = window._activeQuestions;
   const s = loadSession();
   const answers = window._mockAnswers;
-  let correct = 0;
-  mock.questions.forEach((q,i) => { if (answers[i] === q.correct) correct++; });
-  const pct = correct / mock.questions.length;
+  let marksEarned = 0;
+  const marksPossible = questions.reduce((sum,q)=>sum+(q.marks||1),0);
+  questions.forEach((q,i) => { if (answers[i] === q.correct) marksEarned += (q.marks||1); });
   const { data: comp } = await sb.from('rs_components').select('*').eq('id', mock.component_id).maybeSingle();
-  const scaledScore = comp ? Math.round(pct * comp.max_score * 10) / 10 : correct;
-  const { error: e1 } = await sb.from('rs_mock_attempts').insert({ mock_id: mock.id, student_id: s.id, score: scaledScore, total_questions: mock.questions.length });
+  const scaledScore = comp ? Math.round((marksEarned/marksPossible) * comp.max_score * 10) / 10 : marksEarned;
+  const { error: e1 } = await sb.from('rs_mock_attempts').insert({
+    mock_id: mock.id, student_id: s.id, score: scaledScore, total_questions: questions.length,
+    answers, shuffled_questions: questions, marks_earned: marksEarned, marks_possible: marksPossible
+  });
   if (e1) { toast(e1.message,'error'); return; }
   await sb.from('rs_scores').upsert({
     student_id: s.id, subject_id: mock.subject_id, component_id: mock.component_id,
     score: scaledScore, source: 'mock', mock_id: mock.id
   }, { onConflict: 'student_id,subject_id,component_id' });
-  toast(`Mock submitted! Score auto-filled into your record.`, 'success');
-  studentHome();
+
+  if (mock.show_result) {
+    app.innerHTML = `
+      <div class="content" style="max-width:500px;text-align:center;padding-top:60px;">
+        <div class="card">
+          <h2>✅ ${mock.kind==='exam'?'Exam':'Test'} Submitted!</h2>
+          <p style="font-size:34px;font-weight:800;margin:14px 0;color:var(--primary);">${marksEarned}/${marksPossible}</p>
+          <p class="muted">Score has been recorded for ${esc(mock.title)}.</p>
+          <button class="btn" style="margin-top:16px;" onclick="studentHome()">Back to Home</button>
+        </div>
+      </div>`;
+  } else {
+    app.innerHTML = `
+      <div class="content" style="max-width:500px;text-align:center;padding-top:60px;">
+        <div class="card">
+          <h2>✅ Exam Completed!</h2>
+          <p class="muted" style="margin-top:10px;">Your result has been recorded. ${mock.result_release_at ? `It will be available for review on ${fmtDateTime(mock.result_release_at)}.` : `Your teacher will let you know when it's released.`}</p>
+          <button class="btn" style="margin-top:16px;" onclick="studentHome()">Back to Home</button>
+        </div>
+      </div>`;
+  }
+}
+
+/* ---------- STUDENT: exam review (released exams only) ---------- */
+async function studentExamReview(mockId){
+  const s = loadSession();
+  const { data: mock } = await sb.from('rs_mocks').select('*').eq('id', mockId).maybeSingle();
+  const { data: attempt } = await sb.from('rs_mock_attempts').select('*').eq('mock_id', mockId).eq('student_id', s.id).maybeSingle();
+  if (!mock || !attempt) { toast('Not found','error'); return; }
+  const qs = attempt.shuffled_questions || [];
+  const answers = attempt.answers || [];
+  app.innerHTML = `
+    <div class="topbar"><span class="brand">📖 ${esc(mock.title)} — Review</span></div>
+    <div class="content" style="max-width:640px;">
+      <div class="card">
+        <h2>Score: ${attempt.marks_earned}/${attempt.marks_possible}</h2>
+      </div>
+      ${qs.map((q,i) => `
+        <div class="card">
+          <p class="muted">Question ${i+1} · ${q.marks||1} mark(s)</p>
+          <h3 style="margin:6px 0 12px;">${esc(q.q)}</h3>
+          ${q.options.map((opt,oi) => {
+            let style = 'border:1.5px solid var(--border);background:#fff;';
+            if (oi === q.correct) style = 'border:1.5px solid var(--success);background:var(--success-bg);';
+            else if (oi === answers[i]) style = 'border:1.5px solid var(--danger);background:var(--danger-bg);';
+            return `<div style="padding:10px 12px;border-radius:10px;margin-bottom:6px;${style}">
+              ${String.fromCharCode(65+oi)}. ${esc(opt)} ${oi===q.correct?' ✅':''} ${oi===answers[i] && oi!==q.correct?' ❌ (your answer)':''}
+            </div>`;
+          }).join('')}
+          ${q.explanation ? `<div class="banner info" style="margin-top:8px;"><strong>Explanation:</strong> ${esc(q.explanation)}</div>` : ''}
+        </div>`).join('')}
+      <button class="btn" onclick="studentHome()">← Back to Home</button>
+    </div>`;
 }
 
 /* ============================================================
@@ -1332,9 +1630,14 @@ async function studentHome(){
   const s = loadSession();
   app.innerHTML = `<div class="content"><p class="muted">Loading…</p></div>`;
   const mocks = await studentAvailableMocks(s.classId);
-  const attempted = (await sb.from('rs_mock_attempts').select('mock_id').eq('student_id', s.id)).data || [];
-  const attemptedIds = new Set(attempted.map(a=>a.mock_id));
+  const { data: myAttempts } = await sb.from('rs_mock_attempts').select('*').eq('student_id', s.id);
+  const attemptedIds = new Set((myAttempts||[]).map(a=>a.mock_id));
   const { data: publishedTerms } = await sb.from('rs_publish').select('*, rs_terms(*, rs_sessions(*))').eq('class_id', s.classId).eq('published', true);
+
+  // Exams the student has completed AND whose review has been released
+  const { data: allClassMocks } = await sb.from('rs_mocks').select('*').eq('class_id', s.classId).eq('kind','exam');
+  const now = new Date();
+  const releasedExams = (allClassMocks||[]).filter(m => attemptedIds.has(m.id) && m.result_release_at && new Date(m.result_release_at) <= now);
 
   app.innerHTML = `
     <div class="topbar">
@@ -1343,13 +1646,22 @@ async function studentHome(){
     </div>
     <div class="content">
       <div class="card">
-        <h2>📝 Available Mocks</h2>
-        ${mocks.length===0 ? `<p class="muted">No mocks open right now.</p>` : mocks.map(m => `
+        <h2>📝 Available Tests / Exams</h2>
+        ${mocks.length===0 ? `<p class="muted">Nothing open right now.</p>` : mocks.map(m => `
           <div class="list-item">
-            <span><strong>${esc(m.title)}</strong><br><span class="muted">Closes ${fmtDateTime(m.end_time)} · ${m.duration_minutes} min</span></span>
-            ${attemptedIds.has(m.id) ? `<span class="pill green">Completed</span>` : `<button class="btn sm" onclick="studentTakeMock('${m.id}')">Take Mock</button>`}
+            <span><strong>${esc(m.title)}</strong> <span class="pill ${m.kind==='exam'?'red':'gold'}" style="margin-left:4px;">${m.kind==='exam'?'Exam':'Test'}</span><br><span class="muted">Closes ${fmtDateTime(m.end_time)} · ${m.duration_minutes} min</span></span>
+            ${attemptedIds.has(m.id) ? `<span class="pill green">Completed</span>` : `<button class="btn sm" onclick="studentTakeMock('${m.id}')">Start</button>`}
           </div>`).join('')}
       </div>
+      ${releasedExams.length > 0 ? `
+      <div class="card">
+        <h2>📖 Exam Reviews</h2>
+        ${releasedExams.map(m => `
+          <div class="list-item">
+            <span>${esc(m.title)}</span>
+            <button class="btn sm outline" onclick="studentExamReview('${m.id}')">View Review</button>
+          </div>`).join('')}
+      </div>` : ''}
       <div class="card">
         <h2>📄 Your Results</h2>
         ${(!publishedTerms || publishedTerms.length===0) ? `<p class="muted">No results have been published yet.</p>` : publishedTerms.map(p => `
