@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="preconnect" href="https://ucerqmewibwkxdgtgqvc.supabase.co">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
 #bootLoader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#f2eee9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;z-index:9999}
 #bootLoader .spinner{width:40px;height:40px;border-radius:50%;border:4px solid #e2dbd3;border-top-color:#1e1435;animation:bootspin .8s linear infinite}
@@ -69,19 +69,44 @@ th{background:var(--surface-2);font-size:11.5px;text-transform:uppercase;letter-
 .list-item:last-child{border-bottom:none}
 .scoreInput{width:64px;padding:6px;text-align:center}
 .qbox{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px}
-.resultSheet{background:#fff;color:#111;padding:24px;border:2px solid #333;max-width:720px;margin:0 auto}
-.resultSheet h1{font-size:19px;text-align:center}
-.resultSheet .sub{text-align:center;font-size:12.5px;margin-bottom:4px}
-.resultSheet .infoGrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;font-size:13px;margin:12px 0}
-.resultSheet table{font-size:12.5px}
-.resultSheet th,.resultSheet td{border:1px solid #333;padding:5px 6px}
-.sigline{margin-top:26px;border-top:1px solid #333;padding-top:4px;font-size:11.5px}
-.stampBox{border:1.5px dashed #999;height:70px;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;margin-top:8px}
+.resultSheet{background:#fff;color:#161221;padding:14mm 12mm;border:2.5px solid #17244d;border-radius:6px;width:186mm;min-height:270mm;margin:0 auto;font-family:'Inter',sans-serif;box-sizing:border-box;}
+.rsHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;border-bottom:2px solid #c99a3e;padding-bottom:10px;margin-bottom:0;}
+.rsHead .rsHeadCenter{flex:1;text-align:center;}
+.resultSheet h1{font-family:'Playfair Display',serif;font-size:22px;color:#17244d;letter-spacing:.03em;line-height:1.15;}
+.resultSheet .sub{text-align:center;font-size:11px;color:#4a4458;margin:2px 0;}
+.rsPhotoBox{width:80px;height:96px;border:1.5px solid #c99a3e;border-radius:4px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#faf7f0;}
+.rsPhotoBox img{width:100%;height:100%;object-fit:cover;}
+.rsBanner{background:#17244d;color:#fff;text-align:center;padding:7px;font-weight:800;font-size:13.5px;letter-spacing:.08em;margin-top:10px;}
+.rsSessionBar{background:#f6ecd2;color:#8a6a0c;text-align:center;padding:5px;font-weight:700;font-size:11.5px;border:1px solid #c99a3e;border-top:none;}
+.resultSheet .infoGrid{display:grid;grid-template-columns:1fr 1fr;gap:5px 20px;font-size:12px;margin:12px 0;}
+.resultSheet .infoGrid div{border-bottom:1px dotted #bbb;padding-bottom:2px;}
+.resultSheet table{font-size:10.8px;width:100%;border-collapse:collapse;}
+.resultSheet th{background:#17244d;color:#fff;font-size:9.5px;text-transform:uppercase;letter-spacing:.02em;padding:5px 4px;}
+.resultSheet td{padding:4px;border:1px solid #ccc;text-align:center;}
+.resultSheet td:nth-child(2){text-align:left;}
+.rsGrandRow td{background:#dfe4f2;font-weight:800;}
+.rsAvgRow td{background:#f6ecd2;font-weight:800;color:#8a6a0c;}
+.rsBoxRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.rsBox{border:1.5px solid #17244d;border-radius:4px;overflow:hidden;}
+.rsBox h4{background:#17244d;color:#fff;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:5px 8px;margin:0;}
+.rsBox .rsBoxBody{padding:8px;font-size:11px;}
+.rsBox .rsBoxBody div{display:flex;justify-content:space-between;padding:2.5px 0;border-bottom:1px dotted #ddd;}
+.rsGradeTable{width:100%;font-size:10px;}
+.rsGradeTable td{border:none;padding:1.5px 4px;text-align:left;}
+.remarkBox{border:1.5px solid #17244d;border-radius:4px;margin-top:10px;}
+.remarkBox h4{background:#17244d;color:#fff;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:5px 8px;margin:0;}
+.remarkEdit{min-height:34px;padding:7px 8px;font-size:11.5px;outline:none;font-family:inherit;}
+.remarkEdit:focus{background:#fffbe6;}
+.rsFooterGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;margin-top:16px;font-size:11px;}
+.sigline{border-top:1px solid #333;padding-top:3px;margin-top:22px;font-size:10.5px;}
+.stampBox{border:1.5px dashed #999;height:60px;display:flex;align-items:center;justify-content:center;color:#999;font-size:10px;margin-top:8px;}
+@page{ size:A4; margin:8mm; }
 @media print{
   body *{visibility:hidden}
   #printArea,#printArea *{visibility:visible}
-  #printArea{position:absolute;left:0;top:0;width:100%}
+  #printArea{position:absolute;left:0;top:0;width:190mm;border-color:#17244d!important;}
   .no-print{display:none!important}
+  .remarkEdit{background:transparent!important;}
 }
 </style>
 </head>
@@ -439,10 +464,15 @@ async function adminStudents(){
       ${students.length === 0 ? `<p class="muted">No students yet.</p>` : `
       <div style="overflow:auto;">
       <table>
-        <thead><tr><th>Name</th><th>Sex</th><th>Age</th><th>House</th><th>Parent</th><th>Password</th><th>Profile Code</th><th></th></tr></thead>
+        <thead><tr><th>Photo</th><th>Name</th><th>Sex</th><th>Age</th><th>House</th><th>Parent</th><th>Password</th><th>Profile Code</th><th></th></tr></thead>
         <tbody>
         ${students.map(s => `
           <tr>
+            <td>
+              ${s.photo_url ? `<img src="${esc(s.photo_url)}" style="width:40px;height:48px;object-fit:cover;border-radius:3px;">` : `<span class="muted">—</span>`}
+              <br><input type="file" accept="image/*" id="photoFile_${s.id}" style="width:90px;font-size:10px;padding:2px;">
+              <button class="btn sm outline" onclick="uploadStudentPhoto('${s.id}')">Upload</button>
+            </td>
             <td><strong>${esc(s.name)}</strong></td>
             <td>${esc(s.sex||'—')}</td>
             <td>${esc(s.age||'—')}</td>
@@ -457,6 +487,19 @@ async function adminStudents(){
       </div>`}
     </div>`;
   adminShell(body, 'students');
+}
+async function uploadStudentPhoto(studentId){
+  const input = $('photoFile_'+studentId);
+  const file = input?.files?.[0];
+  if (!file) return toast('Choose a photo first','error');
+  toast('Uploading…','info');
+  const path = studentId + '-' + Date.now() + '.' + (file.name.split('.').pop() || 'jpg');
+  const { error: upErr } = await sb.storage.from('student-photos').upload(path, file, { upsert: true });
+  if (upErr) return toast('Upload failed: ' + upErr.message, 'error');
+  const { data: pub } = sb.storage.from('student-photos').getPublicUrl(path);
+  await sb.from('rs_students').update({ photo_url: pub.publicUrl }).eq('id', studentId);
+  toast('Photo uploaded','success');
+  adminStudents();
 }
 async function createStudent(){
   const name = $('stName').value.trim();
@@ -712,6 +755,25 @@ async function fetchSettingsMap(){
   (data||[]).forEach(r => { map[r.key] = r.value; });
   return map;
 }
+async function fetchRemarks(studentId, termId){
+  const { data } = await sb.from('rs_remarks').select('*').eq('student_id', studentId).eq('term_id', termId).maybeSingle();
+  return data || {};
+}
+async function saveRemarkField(studentId, termId, field, value){
+  const payload = { student_id: studentId, term_id: termId, [field]: value };
+  await sb.from('rs_remarks').upsert(payload, { onConflict: 'student_id,term_id' });
+  toast('Saved','success');
+}
+function computeColumnAggregates(p, comps){
+  const n = p.subjectTotals.length;
+  const compSums = comps.map((c,ci) => {
+    const vals = p.subjectTotals.map(s => s.compVals[ci]);
+    return vals.every(v => v != null) ? vals.reduce((a,b)=>a+b,0) : null;
+  });
+  const caSum = p.subjectTotals.every(s=>s.caTotal!=null) ? p.subjectTotals.reduce((a,s)=>a+s.caTotal,0) : null;
+  const totalSum = p.complete ? p.overallTotal : null;
+  return { compSums, caSum, totalSum, n };
+}
 async function showPrintPage(studentId, classId, termId, backFnName){
   app.innerHTML = `<div class="content"><p class="muted">Preparing result sheet…</p></div>`;
   const { subjects, comps, maxPerSubject, caMax, examMax, perStudent } = await computeBroadsheet(classId, termId);
@@ -721,13 +783,15 @@ async function showPrintPage(studentId, classId, termId, backFnName){
   const term = (await sb.from('rs_terms').select('*').eq('id', termId).maybeSingle()).data;
   const session = term ? (await sb.from('rs_sessions').select('*').eq('id', term.session_id).maybeSingle()).data : null;
   const settings = await fetchSettingsMap();
+  const remarks = await fetchRemarks(studentId, termId);
   const classMax = maxPerSubject * subjects.length;
   const st = p.student;
+  const agg = computeColumnAggregates(p, comps);
 
   const rowsHtml = subjects.map((sub, i) => {
     const sTot = p.subjectTotals[i];
     return `<tr>
-      <td>${i+1}</td><td style="text-align:left;">${esc(sub.name)}</td>
+      <td>${i+1}</td><td>${esc(sub.name)}</td>
       ${comps.map((c,ci) => `<td>${sTot.compVals[ci] != null ? sTot.compVals[ci] : '—'}</td>`).join('')}
       <td><strong>${sTot.caTotal!=null ? sTot.caTotal.toFixed(1) : '—'}</strong></td>
       <td><strong>${sTot.total!=null ? sTot.total.toFixed(1) : '—'}</strong></td>
@@ -736,6 +800,19 @@ async function showPrintPage(studentId, classId, termId, backFnName){
     </tr>`;
   }).join('');
 
+  const grandRow = `<tr class="rsGrandRow"><td colspan="2">GRAND TOTAL</td>
+    ${agg.compSums.map(v => `<td>${v!=null ? v.toFixed(1) : '—'}</td>`).join('')}
+    <td>${agg.caSum!=null ? agg.caSum.toFixed(1) : '—'}</td>
+    <td>${agg.totalSum!=null ? agg.totalSum.toFixed(1) : '—'}</td>
+    <td></td><td></td></tr>`;
+  const avgRow = `<tr class="rsAvgRow"><td colspan="2">AVERAGE SCORE</td>
+    ${agg.compSums.map(v => `<td>${v!=null ? (v/agg.n).toFixed(1) : '—'}</td>`).join('')}
+    <td>${agg.caSum!=null ? (agg.caSum/agg.n).toFixed(1) : '—'}</td>
+    <td>${p.average!=null ? p.average.toFixed(1)+'%' : '—'}</td>
+    <td></td><td></td></tr>`;
+
+  const photoHtml = st.photo_url ? `<div class="rsPhotoBox"><img src="${esc(st.photo_url)}"></div>` : `<div style="width:80px;"></div>`;
+
   app.innerHTML = `
     <div class="no-print" style="padding:14px;display:flex;gap:10px;justify-content:center;background:var(--surface);border-bottom:1px solid var(--border);">
       <button class="btn outline" onclick="${backFnName}()">← Back</button>
@@ -743,46 +820,100 @@ async function showPrintPage(studentId, classId, termId, backFnName){
     </div>
     <div style="padding:20px 10px;">
       <div id="printArea" class="resultSheet">
-        <h1>${esc(settings.school_name || 'DE-TRINITY MONTESSORI EDUCATION CENTER')}</h1>
-        <p class="sub">${esc(settings.school_address || 'Off Odiemenyi Road')}</p>
-        <p class="sub" style="font-weight:800;letter-spacing:.05em;">TERMLY ACADEMIC REPORT SHEET</p>
+        <div class="rsHead">
+          <div style="width:80px;"></div>
+          <div class="rsHeadCenter">
+            <h1>${esc(settings.school_name || 'DE-TRINITY MONTESSORI EDUCATION CENTER')}</h1>
+            <p class="sub">${esc(settings.school_address || 'Off Odiemenyi Road')}</p>
+          </div>
+          ${photoHtml}
+        </div>
+        <div class="rsBanner">TERMLY ACADEMIC REPORT SHEET</div>
+        <div class="rsSessionBar">SESSION: ${esc(session?.name||'—')} &nbsp;|&nbsp; ${esc(term?.name||'').toUpperCase()}</div>
+
         <div class="infoGrid">
           <div><strong>Name:</strong> ${esc(st.name)}</div>
+          <div><strong>Admission/Profile Code:</strong> ${esc(st.profile_code||'—')}</div>
           <div><strong>Class:</strong> ${esc(cls?.name||'')}</div>
+          <div><strong>Class Teacher:</strong> ${esc(settings.class_teacher_name||'—')}</div>
           <div><strong>Sex:</strong> ${esc(st.sex||'—')}</div>
-          <div><strong>Age:</strong> ${esc(st.age||'—')}</div>
-          <div><strong>Parent:</strong> ${esc(st.parent_name||'—')}</div>
           <div><strong>House:</strong> ${esc(st.house||'—')}</div>
-          <div><strong>Term:</strong> ${esc(term?.name||'')}</div>
-          <div><strong>Session:</strong> ${esc(session?.name||'')}</div>
+          <div><strong>Age:</strong> ${esc(st.age||'—')}</div>
+          <div><strong>Next Term Begins:</strong> ${esc(settings.reopening_date||'—')}</div>
+          <div style="grid-column:1/-1;"><strong>Parent/Guardian:</strong> ${esc(st.parent_name||'—')}</div>
         </div>
-        <table style="width:100%;">
+
+        <table>
           <thead><tr>
             <th>S/N</th><th style="text-align:left;">Subject</th>
             ${comps.map(c=>`<th>${esc(c.name)}<br>/${c.max_score}</th>`).join('')}
             <th>CA Total<br>/${caMax}</th><th>Total<br>/100</th><th>Grade</th><th>Pos.</th>
           </tr></thead>
-          <tbody>${rowsHtml}</tbody>
+          <tbody>${rowsHtml}${grandRow}${avgRow}</tbody>
         </table>
-        <div class="infoGrid" style="margin-top:14px;">
-          <div>Total: <strong>${p.overallTotal!=null ? p.overallTotal.toFixed(1) : '—'} out of ${classMax}</strong></div>
-          <div>Average: <strong>${p.average!=null ? p.average.toFixed(1)+'%' : '—'}</strong></div>
-          <div>Position: <strong>${p.overallPosition ? ordinal(p.overallPosition) + ' in class' : (p.complete ? '—' : 'Incomplete')}</strong></div>
-          <div>Fees payable: <strong>${esc(settings.fees_payable||'—')}</strong></div>
+
+        <div class="rsBoxRow">
+          <div class="rsBox">
+            <h4>Result Summary</h4>
+            <div class="rsBoxBody">
+              <div><span>Total Score</span><strong>${p.overallTotal!=null ? p.overallTotal.toFixed(1) : '—'}</strong></div>
+              <div><span>Average Score (%)</span><strong>${p.average!=null ? p.average.toFixed(1)+'%' : '—'}</strong></div>
+              <div><span>Class Position</span><strong>${p.overallPosition ? ordinal(p.overallPosition) : (p.complete?'—':'Incomplete')}</strong></div>
+              <div><span>Out of</span><strong>${classMax}</strong></div>
+            </div>
+          </div>
+          <div class="rsBox">
+            <h4>WAEC Grading Scale</h4>
+            <table class="rsGradeTable">
+              <tr><td>A1 75–100</td><td>Excellent</td></tr>
+              <tr><td>B2 70–74</td><td>Very Good</td></tr>
+              <tr><td>B3 65–69</td><td>Good</td></tr>
+              <tr><td>C4 60–64 / C5 55–59 / C6 50–54</td><td>Credit</td></tr>
+              <tr><td>D7 45–49 / E8 40–44</td><td>Pass</td></tr>
+              <tr><td>F9 Below 40</td><td>Fail</td></tr>
+            </table>
+          </div>
         </div>
-        <div style="margin-top:10px;"><strong>Remark:</strong> ${esc(overallRemark(p.average))}</div>
-        <div class="grid2" style="margin-top:22px;">
-          <div class="sigline">Class Teacher: ${esc(settings.class_teacher_name||'')} — Sign: ______________</div>
-          <div class="sigline">Headmistress: ${esc(settings.headmistress_name||'')} — Sign: ______________</div>
-          <div class="sigline">Proprietress: ${esc(settings.proprietress_name||'')} — Sign: ______________</div>
-          <div class="sigline">School reopens on: ${esc(settings.reopening_date||'—')}</div>
+
+        <div class="remarkBox">
+          <h4>Class Teacher's Remark</h4>
+          <div class="remarkEdit" contenteditable="true" id="remarkCT"
+            onblur="saveRemarkField('${studentId}','${termId}','class_teacher_remark', this.innerText)">${esc(remarks.class_teacher_remark || overallRemark(p.average))}</div>
         </div>
-        <div class="stampBox">School Stamp</div>
+        <div class="remarkBox">
+          <h4>Head Teacher's / Headmistress's Remark</h4>
+          <div class="remarkEdit" contenteditable="true" id="remarkHT"
+            onblur="saveRemarkField('${studentId}','${termId}','head_teacher_remark', this.innerText)">${esc(remarks.head_teacher_remark || '')}</div>
+        </div>
+        <div class="remarkBox">
+          <h4>Other Remarks / Notes</h4>
+          <div class="remarkEdit" contenteditable="true" id="remarkOther"
+            onblur="saveRemarkField('${studentId}','${termId}','other_notes', this.innerText)">${esc(remarks.other_notes || '')}</div>
+        </div>
+
+        <div class="rsFooterGrid">
+          <div>
+            <div class="sigline">Class Teacher: ${esc(settings.class_teacher_name||'')}<br>Sign: ______________</div>
+            <div class="sigline">Headmistress: ${esc(settings.headmistress_name||'')}<br>Sign: ______________</div>
+          </div>
+          <div>
+            <div class="sigline">Proprietress: ${esc(settings.proprietress_name||'')}<br>Sign: ______________</div>
+            <div class="sigline">Fees Payable: ${esc(settings.fees_payable||'—')}</div>
+          </div>
+          <div>
+            <div class="remarkBox" style="margin-top:0;">
+              <h4>Debt</h4>
+              <div class="remarkEdit" contenteditable="true" id="remarkDebt"
+                onblur="saveRemarkField('${studentId}','${termId}','debt', this.innerText)">${esc(remarks.debt || '—')}</div>
+            </div>
+          </div>
+          <div class="stampBox">School Stamp</div>
+        </div>
       </div>
     </div>`;
 }
 function overallRemark(avg){
-  if (avg == null) return '—';
+  if (avg == null) return '';
   if (avg >= 75) return 'Excellent performance. Keep it up!';
   if (avg >= 60) return 'Very good result.';
   if (avg >= 50) return 'Good, but there is room for improvement.';
