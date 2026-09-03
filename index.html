@@ -69,48 +69,19 @@ th{background:var(--surface-2);font-size:11.5px;text-transform:uppercase;letter-
 .list-item:last-child{border-bottom:none}
 .scoreInput{width:64px;padding:6px;text-align:center}
 .qbox{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px}
-.resultSheet{background:#fff;color:#161221;padding:7mm 9mm;border:2.5px solid #17244d;border-radius:6px;width:190mm;margin:0 auto;font-family:'Inter',sans-serif;box-sizing:border-box;}
-.rsHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;border-bottom:2px solid #c99a3e;padding-bottom:6px;margin-bottom:0;}
-.rsHead .rsHeadCenter{flex:1;text-align:center;}
-.resultSheet h1{font-family:'Playfair Display',serif;font-size:17px;color:#17244d;letter-spacing:.02em;line-height:1.12;margin:0;}
-.resultSheet .sub{text-align:center;font-size:10px;color:#4a4458;margin:2px 0 0;}
-.rsPhotoBox{width:78px;height:92px;border:1.5px solid #c99a3e;border-radius:4px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#faf7f0;}
-.rsPhotoBox img{width:100%;height:100%;object-fit:cover;}
-.rsBanner{background:#17244d;color:#fff;text-align:center;padding:3px;font-weight:800;font-size:11px;letter-spacing:.05em;margin-top:4px;}
-.rsSessionBar{background:#f6ecd2;color:#8a6a0c;text-align:center;padding:2px;font-weight:700;font-size:10px;border:1px solid #c99a3e;border-top:none;}
-.resultSheet .infoGrid{display:grid;grid-template-columns:1fr 1fr;gap:1px 20px;font-size:10.5px;margin:6px 0;}
-.resultSheet .infoGrid div{border-bottom:1px dotted #bbb;padding-bottom:1px;}
-.resultSheet table{font-size:10px;width:100%;border-collapse:collapse;}
-.resultSheet th{background:#17244d;color:#fff;font-size:8px;text-transform:uppercase;letter-spacing:.01em;padding:2px 2px;line-height:1.15;}
-.resultSheet td{padding:1.8px 2.5px;border:1px solid #ccc;text-align:center;font-size:9.5px;}
-.resultSheet td:nth-child(2){text-align:left;}
-.rsGrandRow td{background:#dfe4f2;font-weight:800;}
-.rsAvgRow td{background:#f6ecd2;font-weight:800;color:#8a6a0c;}
-.rsBoxRow{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
-.rsBox{border:1.5px solid #17244d;border-radius:4px;overflow:hidden;}
-.rsBox h4{background:#17244d;color:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.02em;padding:2px 6px;margin:0;}
-.rsBox .rsBoxBody{padding:3px 6px;font-size:9.5px;}
-.rsBox .rsBoxBody div{display:flex;justify-content:space-between;padding:1px 0;border-bottom:1px dotted #ddd;}
-.rsGradeTable{width:100%;font-size:8.3px;}
-.rsGradeTable td{border:none;padding:0.5px 3px;text-align:left;}
-.remarkBox{border:1.5px solid #17244d;border-radius:4px;}
-.remarkBox h4{background:#17244d;color:#fff;font-size:8.5px;text-transform:uppercase;letter-spacing:.02em;padding:2px 6px;margin:0;}
-.remarkEdit{min-height:13px;padding:3px 6px;font-size:9.5px;outline:none;font-family:inherit;line-height:1.25;}
-.remarkEdit:focus{background:#fffbe6;}
-.rsRemarkGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
-.rsFooterGrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-top:10px;font-size:10px;}
-.sigline{border-top:1px solid #333;padding-top:2px;margin-top:12px;font-size:9.5px;}
-.stampBox{border:1.5px dashed #999;height:44px;display:flex;align-items:center;justify-content:center;color:#999;font-size:9px;margin-top:4px;}
-@page{ size:A4; margin:8mm; }
-*{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;}
-@media print{
-  html,body{width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
-  body *{visibility:hidden}
-  #printArea,#printArea *{visibility:visible;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
-  #printArea{position:absolute;left:10mm;top:8mm;margin:0!important;border-color:#17244d!important;transform-origin:top left;}
-  .no-print{display:none!important}
-  .remarkEdit{background:transparent!important;}
-}
+.resultSheet{background:#fff;color:#172033;padding:6.5mm 7mm 5.5mm;border:1px solid #9aa6b2;border-radius:0;width:190mm;min-height:281mm;margin:0 auto;font-family:'Inter',sans-serif;box-sizing:border-box;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.rsHead{display:grid;grid-template-columns:64px 1fr 64px;align-items:center;gap:8px;border-bottom:3px solid #172a46;padding-bottom:6px;margin-bottom:5px}.rsHead.no-photo{grid-template-columns:64px 1fr}
+.rsLogo{width:54px;height:54px;border:2px solid #c89a45;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#f7f2e8;color:#172a46;font-weight:900;font-size:11px;text-align:center;line-height:1.05}
+.rsHeadCenter{text-align:center}.resultSheet h1{font-family:'Playfair Display',serif;font-size:20px;color:#172a46;letter-spacing:.01em;line-height:1.05;margin:0}.resultSheet .sub{text-align:center;font-size:9.2px;color:#566273;margin:3px 0 0}.rsMotto{font-size:8px;color:#9a722e;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+.rsPhotoBox{width:58px;height:68px;border:1px solid #c89a45;border-radius:2px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#f7f2e8;color:#8b7a61;font-size:8px;text-align:center}.rsPhotoBox img{width:100%;height:100%;object-fit:cover}
+.rsBanner{background:#172a46;color:#fff;text-align:center;padding:5px;font-weight:900;font-size:11px;letter-spacing:.12em}.rsSessionBar{background:#f4ead7;color:#6e5324;text-align:center;padding:3px;font-weight:800;font-size:9px;border:1px solid #d6b16c;border-top:0}
+.rsStudentCard{margin-top:6px;border:1px solid #aeb7c2}.rsStudentCardTitle{background:#e8edf2;color:#172a46;font-size:8px;font-weight:900;letter-spacing:.08em;padding:3px 6px;text-transform:uppercase}.resultSheet .infoGrid{display:grid;grid-template-columns:1fr 1fr;gap:0;font-size:9.2px;margin:0}.resultSheet .infoGrid div{padding:3px 6px;border-top:1px solid #d2d7dc;min-height:18px}.resultSheet .infoGrid div:nth-child(odd){border-right:1px solid #d2d7dc}.resultSheet .infoGrid div strong{color:#526071;font-size:8px;text-transform:uppercase;margin-right:4px}
+.resultSheet table{font-size:8.7px;width:100%;border-collapse:collapse;flex-shrink:0}.rsMarksTable{margin-top:7px;border:1px solid #9aa6b2}.resultSheet th{background:#20364f;color:#fff;font-size:7.5px;text-transform:uppercase;letter-spacing:.02em;padding:4px 2px;line-height:1.1;border-right:1px solid rgba(255,255,255,.22)}.resultSheet td{padding:3px 2px;border:1px solid #c3c9cf;text-align:center;font-size:8.4px;line-height:1.12}.resultSheet td:nth-child(2){text-align:left;padding-left:5px}.resultSheet tbody tr:nth-child(even) td{background:#f8fafb}.rsGrandRow td{background:#e5ebf1!important;font-weight:900;font-size:8.8px}.rsAvgRow td{background:#f6ecd7!important;font-weight:900;color:#76551f}.rsGradeBadge{font-weight:900}.rsPositionBadge{font-weight:900;color:#172a46}
+.rsSummaryGrid{display:grid;grid-template-columns:1.35fr .9fr .9fr;gap:5px;margin-top:6px}.rsStat{border:1px solid #b4bdc7;background:#fbfcfd}.rsStat .label{background:#e8edf2;color:#536173;font-size:7.5px;font-weight:900;text-transform:uppercase;padding:3px 5px;letter-spacing:.05em}.rsStat .value{font-size:11px;font-weight:900;color:#172a46;padding:5px;text-align:center}.rsStat.gold .value{color:#76551f;background:#fbf4e6}
+.rsLowerGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:6px;margin-top:6px}.rsPanel{border:1px solid #aeb7c2}.rsPanelTitle{background:#20364f;color:#fff;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;padding:3px 6px}.rsPanelBody{padding:4px 6px;font-size:8.5px}.rsAttendance{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}.rsAttendance div{background:#f3f5f7;border:1px solid #d3d8de;padding:4px;text-align:center}.rsAttendance b{display:block;font-size:10px;color:#172a46}.rsGradeScale{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px 6px;font-size:7.6px}.rsGradeScale span{padding:2px 0;border-bottom:1px dotted #ccd1d6}
+.rsRemarkGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}.remarkBox{border:1px solid #aeb7c2}.remarkBox h4{background:#e8edf2;color:#20364f;font-size:7.8px;text-transform:uppercase;letter-spacing:.04em;padding:3px 6px;margin:0}.remarkEdit{min-height:25px;padding:5px 6px;font-size:8.5px;outline:none;font-family:inherit;line-height:1.25}.remarkEdit:focus{background:#fffbe6}
+.rsSignGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:auto;padding-top:7px}.rsSign{border:1px solid #aeb7c2}.rsSign h4{background:#20364f;color:#fff;font-size:7.8px;text-transform:uppercase;padding:3px 5px}.rsSignBody{padding:5px;font-size:8.2px;min-height:38px}.rsSignLine{border-top:1px solid #69737e;margin-top:10px;padding-top:2px;font-size:7.5px}.rsFinalBar{display:grid;grid-template-columns:1fr 1.25fr .85fr;margin-top:6px;border:1px solid #aeb7c2}.rsFinalBar>div{padding:4px 6px;font-size:8px;border-right:1px solid #aeb7c2}.rsFinalBar>div:last-child{border-right:0}.rsFinalBar b{color:#536173;text-transform:uppercase;font-size:7.3px}.stampBox{height:42px;display:flex;align-items:center;justify-content:center;color:#7d8792;font-size:7.5px;text-transform:uppercase;letter-spacing:.08em}.no-print{flex-shrink:0}
+@page{size:A4;margin:8mm}*{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}@media print{html,body{width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body *{visibility:hidden}#printArea,#printArea *{visibility:visible}#printArea{position:absolute;left:10mm;top:8mm;margin:0!important;width:190mm!important;min-height:281mm!important;transform-origin:top left}.no-print{display:none!important}.remarkEdit{background:transparent!important}}
 </style>
 </head>
 <body>
@@ -946,7 +917,6 @@ async function showPrintPage(studentId, classId, termId, backFnName){
   const classMax = maxPerSubject * subjects.length;
   const st = p.student;
   const agg = computeColumnAggregates(p, comps);
-
   const caComponents = comps.slice(0, -1);
   const examComponent = comps[comps.length - 1];
 
@@ -958,159 +928,118 @@ async function showPrintPage(studentId, classId, termId, backFnName){
       <td><strong>${sTot.caTotal!=null ? sTot.caTotal.toFixed(1) : '—'}</strong></td>
       <td>${sTot.examScore != null ? sTot.examScore : '—'}</td>
       <td><strong>${sTot.total!=null ? sTot.total.toFixed(1) : '—'}</strong></td>
-      <td>${sTot.grade ? sTot.grade.grade : '—'}</td>
-      <td><strong>${sTot.position ? ordinal(sTot.position) : '—'}</strong></td>
+      <td class="rsGradeBadge">${sTot.grade ? sTot.grade.grade : '—'}</td>
+      <td class="rsPositionBadge">${sTot.position ? ordinal(sTot.position) : '—'}</td>
     </tr>`;
   }).join('');
-
-  const grandRow = `<tr class="rsGrandRow"><td colspan="2">GRAND TOTAL</td>
+  const grandRow = `<tr class="rsGrandRow"><td></td><td>GRAND TOTAL</td>
     ${agg.compSums.slice(0,-1).map(v => `<td>${v!=null ? v.toFixed(1) : '—'}</td>`).join('')}
     <td>${agg.caSum!=null ? agg.caSum.toFixed(1) : '—'}</td>
     <td>${agg.compSums[agg.compSums.length-1]!=null ? agg.compSums[agg.compSums.length-1].toFixed(1) : '—'}</td>
-    <td>${agg.totalSum!=null ? agg.totalSum.toFixed(1) : '—'}</td>
-    <td></td><td></td></tr>`;
-  const avgRow = `<tr class="rsAvgRow"><td colspan="2">AVERAGE SCORE</td>
+    <td>${agg.totalSum!=null ? agg.totalSum.toFixed(1) : '—'}</td><td></td><td></td></tr>`;
+  const avgRow = `<tr class="rsAvgRow"><td></td><td>AVERAGE SCORE</td>
     ${agg.compSums.slice(0,-1).map(v => `<td>${v!=null ? (v/agg.n).toFixed(1) : '—'}</td>`).join('')}
     <td>${agg.caSum!=null ? (agg.caSum/agg.n).toFixed(1) : '—'}</td>
     <td>${agg.compSums[agg.compSums.length-1]!=null ? (agg.compSums[agg.compSums.length-1]/agg.n).toFixed(1) : '—'}</td>
-    <td>${p.average!=null ? p.average.toFixed(1)+'%' : '—'}</td>
-    <td></td><td></td></tr>`;
+    <td>${p.average!=null ? p.average.toFixed(1)+'%' : '—'}</td><td></td><td></td></tr>`;
 
-  const photoHtml = st.photo_url ? `<div class="rsPhotoBox"><img src="${esc(st.photo_url)}"></div>` : `<div style="width:78px;"></div>`;
-
-  // Fit the rendered sheet to the actual A4 printable area. Fewer subjects are
-  // enlarged and many subjects are reduced automatically.
-  const scaleCSS = `@media print{#printArea{width:190mm!important;}}`;
+  const photoHtml = st.photo_url ? `<div class="rsPhotoBox"><img src="${esc(st.photo_url)}"></div>` : '';
+  const totalDays = remarks.total_days ?? '—';
+  const present = remarks.days_present ?? '—';
+  const absent = (remarks.total_days!=null && remarks.days_present!=null) ? Math.max(0, remarks.total_days-remarks.days_present) : '—';
+  const rankText = p.overallPosition ? ordinal(p.overallPosition)+' of '+students.length : (p.complete ? '—' : 'Incomplete');
 
   app.innerHTML = `
     <div class="no-print" style="padding:14px;display:flex;gap:10px;justify-content:center;background:var(--surface);border-bottom:1px solid var(--border);">
       <button class="btn outline" onclick="${backFnName}()">← Back</button>
-      <button class="btn gold" onclick="window.print()">🖨️ Print</button>
+      <button class="btn gold" onclick="window.print()">🖨️ Print Result</button>
     </div>
-    <style>${scaleCSS}</style>
     <div style="padding:20px 10px;">
       <div id="printArea" class="resultSheet">
-        <div class="rsHead">
-          <div style="width:78px;"></div>
+        <div class="rsHead ${st.photo_url ? '' : 'no-photo'}">
+          <div class="rsLogo">DE-<br>TRINITY</div>
           <div class="rsHeadCenter">
             <h1>${esc(settings.school_name || 'DE-TRINITY MONTESSORI EDUCATION CENTER')}</h1>
             <p class="sub">${esc(settings.school_address || 'Off Odiemenyi Road')}</p>
+            <div class="rsMotto">Academic Excellence • Character • Discipline</div>
           </div>
           ${photoHtml}
         </div>
         <div class="rsBanner">TERMLY ACADEMIC REPORT SHEET</div>
-        <div class="rsSessionBar">SESSION: ${esc(session?.name||'—')} &nbsp;|&nbsp; ${esc(term?.name||'').toUpperCase()}</div>
+        <div class="rsSessionBar">SESSION ${esc(session?.name||'—')} &nbsp; • &nbsp; ${esc((term?.name||'').toUpperCase())}</div>
 
-        <div class="infoGrid">
-          <div><strong>Name:</strong> ${esc(st.name)}</div>
-          <div><strong>Admission/Profile Code:</strong> ${esc(st.profile_code||'—')}</div>
-          <div><strong>Class:</strong> ${esc(cls?.name||'')}</div>
-          <div><strong>Class Teacher:</strong> ${esc(settings.class_teacher_name||'—')}</div>
-          <div><strong>Sex:</strong> ${esc(st.sex||'—')}</div>
-          <div><strong>House:</strong> ${esc(st.house||'—')}</div>
-          <div><strong>Age:</strong> ${esc(st.age||'—')}</div>
-          <div><strong>Next Term Begins:</strong> ${esc(settings.reopening_date||'—')}</div>
-          <div style="grid-column:1/-1;"><strong>Parent/Guardian:</strong> ${esc(st.parent_name||'—')}</div>
+        <div class="rsStudentCard">
+          <div class="rsStudentCardTitle">Student Information</div>
+          <div class="infoGrid">
+            <div><strong>Student</strong>${esc(st.name)}</div>
+            <div><strong>Admission / Profile Code</strong>${esc(st.profile_code||'—')}</div>
+            <div><strong>Class</strong>${esc(cls?.name||'—')}</div>
+            <div><strong>Class Teacher</strong>${esc(settings.class_teacher_name||'—')}</div>
+            <div><strong>Sex</strong>${esc(st.sex||'—')}</div>
+            <div><strong>House</strong>${esc(st.house||'—')}</div>
+            <div><strong>Age</strong>${esc(st.age||'—')}</div>
+            <div><strong>Next Term Begins</strong>${esc(settings.reopening_date||'—')}</div>
+            <div style="grid-column:1/-1"><strong>Parent / Guardian</strong>${esc(st.parent_name||'—')}</div>
+          </div>
         </div>
 
-        <table>
-          <thead><tr>
-            <th>S/N</th><th style="text-align:left;">Subject</th>
-            ${caComponents.map(c=>`<th>${esc(c.name)}<br>/${c.max_score}</th>`).join('')}
-            <th>CA Total<br>/${caMax}</th>
-            <th>${examComponent?esc(examComponent.name):'Exam'}<br>/${examMax}</th>
-            <th>Total<br>/100</th><th>Grade</th><th>Pos.</th>
+        <table class="rsMarksTable">
+          <thead><tr><th>S/N</th><th style="text-align:left">SUBJECT</th>
+            ${caComponents.map(c=>`<th>${esc(c.name)}<br><span style="font-weight:600">/${c.max_score}</span></th>`).join('')}
+            <th>CA TOTAL<br>/${caMax}</th><th>${examComponent?esc(examComponent.name):'EXAM'}<br>/${examMax}</th><th>TOTAL<br>/100</th><th>GRADE</th><th>POS.</th>
           </tr></thead>
           <tbody>${rowsHtml}${grandRow}${avgRow}</tbody>
         </table>
 
-        <div class="rsBoxRow" style="grid-template-columns:1fr 1fr 1fr;">
-          <div class="rsBox">
-            <h4>Result Summary</h4>
-            <div class="rsBoxBody">
-              <div><span>Total Score</span><strong>${p.overallTotal!=null ? p.overallTotal.toFixed(1)+'/'+classMax : '—'}</strong></div>
-              <div><span>Average (%)</span><strong>${p.average!=null ? p.average.toFixed(1)+'%' : '—'}</strong></div>
-              <div><span>Position</span><strong>${p.overallPosition ? ordinal(p.overallPosition)+' of '+students.length : (p.complete?'—':'Incomplete')}</strong></div>
-            </div>
-          </div>
-          <div class="rsBox">
-            <h4>Attendance</h4>
-            <div class="rsBoxBody">
-              <div><span>School Opened</span><strong>${remarks.total_days ?? '—'}</strong></div>
-              <div><span>Days Present</span><strong>${remarks.days_present ?? '—'}</strong></div>
-              <div><span>Days Absent</span><strong>${(remarks.total_days!=null && remarks.days_present!=null) ? (remarks.total_days-remarks.days_present) : '—'}</strong></div>
-            </div>
-          </div>
-          <div class="rsBox">
-            <h4>WAEC Grading Scale</h4>
-            <table class="rsGradeTable">
-              <tr><td>A1 75–100</td><td>Excellent</td></tr>
-              <tr><td>B2 70–74</td><td>V.Good</td></tr>
-              <tr><td>B3 65–69</td><td>Good</td></tr>
-              <tr><td>C4–C6 50–64</td><td>Credit</td></tr>
-              <tr><td>D7–E8 40–49</td><td>Pass</td></tr>
-              <tr><td>F9 Below 40</td><td>Fail</td></tr>
-            </table>
-          </div>
+        <div class="rsSummaryGrid">
+          <div class="rsStat"><div class="label">Overall Total</div><div class="value">${p.overallTotal!=null ? p.overallTotal.toFixed(1)+' / '+classMax : '—'}</div></div>
+          <div class="rsStat gold"><div class="label">Average</div><div class="value">${p.average!=null ? p.average.toFixed(1)+'%' : '—'}</div></div>
+          <div class="rsStat"><div class="label">Class Position</div><div class="value">${rankText}</div></div>
+        </div>
+
+        <div class="rsLowerGrid">
+          <div class="rsPanel"><div class="rsPanelTitle">Attendance Record</div><div class="rsPanelBody rsAttendance">
+            <div><b>${totalDays}</b>School Opened</div><div><b>${present}</b>Days Present</div><div><b>${absent}</b>Days Absent</div>
+          </div></div>
+          <div class="rsPanel"><div class="rsPanelTitle">Grading Scale</div><div class="rsPanelBody rsGradeScale">
+            <span><b>A1</b> 75–100 Excellent</span><span><b>B2</b> 70–74 V.Good</span><span><b>B3</b> 65–69 Good</span>
+            <span><b>C4</b> 60–64 Credit</span><span><b>C5</b> 55–59 Credit</span><span><b>C6</b> 50–54 Credit</span>
+            <span><b>D7</b> 45–49 Pass</span><span><b>E8</b> 40–44 Pass</span><span><b>F9</b> 0–39 Fail</span>
+          </div></div>
         </div>
 
         <div class="rsRemarkGrid">
-          <div class="remarkBox">
-            <h4>Class Teacher's Remark</h4>
-            <div class="remarkEdit" contenteditable="true" id="remarkCT"
-              onblur="saveRemarkField('${studentId}','${termId}','class_teacher_remark', this.innerText)">${esc(remarks.class_teacher_remark || overallRemark(p.average))}</div>
-          </div>
-          <div class="remarkBox">
-            <h4>Head Teacher's / Headmistress's Remark</h4>
-            <div class="remarkEdit" contenteditable="true" id="remarkHT"
-              onblur="saveRemarkField('${studentId}','${termId}','head_teacher_remark', this.innerText)">${esc(remarks.head_teacher_remark || '')}</div>
-          </div>
+          <div class="remarkBox"><h4>Class Teacher's Remark</h4><div class="remarkEdit" contenteditable="true" onblur="saveRemarkField('${studentId}','${termId}','class_teacher_remark', this.innerText)">${esc(remarks.class_teacher_remark || overallRemark(p.average))}</div></div>
+          <div class="remarkBox"><h4>Head Teacher's / Headmistress's Remark</h4><div class="remarkEdit" contenteditable="true" onblur="saveRemarkField('${studentId}','${termId}','head_teacher_remark', this.innerText)">${esc(remarks.head_teacher_remark || '')}</div></div>
         </div>
         <div class="rsRemarkGrid">
-          <div class="remarkBox">
-            <h4>Other Remarks / Notes</h4>
-            <div class="remarkEdit" contenteditable="true" id="remarkOther"
-              onblur="saveRemarkField('${studentId}','${termId}','other_notes', this.innerText)">${esc(remarks.other_notes || '')}</div>
-          </div>
-          <div class="remarkBox">
-            <h4>Debt</h4>
-            <div class="remarkEdit" contenteditable="true" id="remarkDebt"
-              onblur="saveRemarkField('${studentId}','${termId}','debt', this.innerText)">${esc(remarks.debt || '—')}</div>
-          </div>
+          <div class="remarkBox"><h4>Other Remarks / Notes</h4><div class="remarkEdit" contenteditable="true" onblur="saveRemarkField('${studentId}','${termId}','other_notes', this.innerText)">${esc(remarks.other_notes || '')}</div></div>
+          <div class="remarkBox"><h4>Financial Status / Debt</h4><div class="remarkEdit" contenteditable="true" onblur="saveRemarkField('${studentId}','${termId}','debt', this.innerText)">${esc(remarks.debt || '—')}</div></div>
         </div>
 
-        <div class="rsBoxRow" style="grid-template-columns:1fr 1fr 1fr;margin-top:6px;">
-          <div class="rsBox">
-            <h4>Class Teacher</h4>
-            <div class="rsBoxBody" style="text-align:center;">
-              <div style="display:block;border:none;padding:1px 0;">${esc(settings.class_teacher_name||'—')}</div>
-              <div style="display:block;border:none;padding:5px 0 1px;border-top:1px solid #999;margin-top:6px;">Sign & Date</div>
-            </div>
-          </div>
-          <div class="rsBox">
-            <h4>Headmistress</h4>
-            <div class="rsBoxBody" style="text-align:center;">
-              <div style="display:block;border:none;padding:1px 0;">${esc(settings.headmistress_name||'—')}</div>
-              <div style="display:block;border:none;padding:5px 0 1px;border-top:1px solid #999;margin-top:6px;">Sign & Date</div>
-            </div>
-          </div>
-          <div class="rsBox">
-            <h4>Proprietress</h4>
-            <div class="rsBoxBody" style="text-align:center;">
-              <div style="display:block;border:none;padding:1px 0;">${esc(settings.proprietress_name||'—')}</div>
-              <div style="display:block;border:none;padding:5px 0 1px;border-top:1px solid #999;margin-top:6px;">Sign & Date</div>
-            </div>
-          </div>
+        <div class="rsSignGrid">
+          <div class="rsSign"><h4>Class Teacher</h4><div class="rsSignBody">${esc(settings.class_teacher_name||'—')}<div class="rsSignLine">Signature & Date</div></div></div>
+          <div class="rsSign"><h4>Headmistress</h4><div class="rsSignBody">${esc(settings.headmistress_name||'—')}<div class="rsSignLine">Signature & Date</div></div></div>
+          <div class="rsSign"><h4>Proprietress</h4><div class="rsSignBody">${esc(settings.proprietress_name||'—')}<div class="rsSignLine">Signature & Date</div></div></div>
         </div>
-        <div class="rsBoxRow" style="margin-top:6px;">
-          <div class="rsBox">
-            <h4>Fees Payable</h4>
-            <div class="rsBoxBody" style="text-align:center;font-weight:700;">${esc(settings.fees_payable||'—')}</div>
-          </div>
-          <div class="stampBox" style="margin-top:0;">School Stamp</div>
+        <div class="rsFinalBar">
+          <div><b>Fees Payable</b><br>${esc(settings.fees_payable||'—')}</div>
+          <div><b>Next Term Begins</b><br>${esc(settings.reopening_date||'—')}</div>
+          <div class="stampBox">Official School Stamp</div>
         </div>
       </div>
     </div>`;
+
+  const fitA4 = () => {
+    const sheet = $('printArea'); if (!sheet) return;
+    const targetHeightPx = 281 * 96 / 25.4;
+    const naturalHeight = Math.max(sheet.scrollHeight, 1);
+    const scale = Math.max(0.50, Math.min(1, targetHeightPx / naturalHeight));
+    sheet.style.transform = `scale(${scale})`;
+    sheet.style.width = `calc(190mm / ${scale})`;
+    sheet.style.minHeight = '281mm';
+  };
+  requestAnimationFrame(()=>{fitA4();setTimeout(fitA4,150);setTimeout(fitA4,500);});
 }
 function overallRemark(avg){
   if (avg == null) return '';
@@ -1428,18 +1357,27 @@ function renderMockQuestion(idx){
     ${mock.show_calculator ? `<button class="btn gold" style="position:fixed;bottom:16px;right:16px;border-radius:50%;width:52px;height:52px;font-size:20px;z-index:400;" onclick="toggleMockCalculator(true)">🧮</button>` : ''}
   `;
 
-  requestAnimationFrame(() => {
+  const fitA4 = () => {
     const sheet = $('printArea');
     if (!sheet) return;
+    // Printable A4 area with the 8mm @page margins. Keep the border itself
+    // at the full printable height when the content is short. If content is
+    // long (many subjects), scale the whole sheet down just enough to fit.
     const targetHeightPx = 281 * 96 / 25.4;
-    const naturalHeight = sheet.scrollHeight;
-    let fitScale = targetHeightPx / naturalHeight;
-    fitScale = Math.max(0.52, Math.min(2.0, fitScale));
+    const naturalHeight = Math.max(sheet.scrollHeight, 1);
+    let fitScale = naturalHeight > targetHeightPx ? targetHeightPx / naturalHeight : 1;
+    fitScale = Math.max(0.42, Math.min(1.0, fitScale));
     sheet.style.transform = `scale(${fitScale})`;
     sheet.style.width = `calc(190mm / ${fitScale})`;
-    sheet.style.minHeight = '0';
+    sheet.style.minHeight = '281mm';
     sheet.style.margin = '0';
     sheet.dataset.printScale = fitScale.toFixed(4);
+  };
+  requestAnimationFrame(() => {
+    fitA4();
+    // Re-fit after fonts/images settle so the printed sheet remains one-page A4.
+    setTimeout(fitA4, 150);
+    setTimeout(fitA4, 500);
   });
 }
 function selectMockAnswer(idx, oi){ window._mockAnswers[idx] = oi; renderMockQuestion(idx); }
