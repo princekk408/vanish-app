@@ -104,10 +104,10 @@ th{background:var(--surface-2);font-size:11.5px;text-transform:uppercase;letter-
 @page{ size:A4; margin:8mm; }
 *{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;}
 @media print{
-  html,body{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
+  html,body{width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
   body *{visibility:hidden}
   #printArea,#printArea *{visibility:visible;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
-  #printArea{position:absolute;left:0;top:0;width:190mm;border-color:#17244d!important;}
+  #printArea{position:absolute;left:10mm;top:8mm;margin:0!important;border-color:#17244d!important;transform-origin:top left;}
   .no-print{display:none!important}
   .remarkEdit{background:transparent!important;}
 }
@@ -978,30 +978,9 @@ async function showPrintPage(studentId, classId, termId, backFnName){
 
   const photoHtml = st.photo_url ? `<div class="rsPhotoBox"><img src="${esc(st.photo_url)}"></div>` : `<div style="width:78px;"></div>`;
 
-  // Scale everything up when there are fewer subjects, so the sheet still fills the A4 page
-  const scale = Math.max(0.75, Math.min(2.3, 12 / Math.max(subjects.length, 4)));
-  const scaleCSS = `
-    #printArea{font-size:${(10*scale).toFixed(1)}px;}
-    #printArea h1{font-size:${(17*scale).toFixed(1)}px;}
-    #printArea .sub{font-size:${(10*scale).toFixed(1)}px;}
-    #printArea .rsPhotoBox{width:${Math.round(78*Math.min(scale,1.7))}px;height:${Math.round(92*Math.min(scale,1.7))}px;}
-    #printArea .rsBanner{padding:${(3*scale).toFixed(1)}px;font-size:${(11*scale).toFixed(1)}px;}
-    #printArea .rsSessionBar{padding:${(2*scale).toFixed(1)}px;font-size:${(10*scale).toFixed(1)}px;}
-    #printArea .infoGrid{font-size:${(10.5*scale).toFixed(1)}px;margin:${(6*scale).toFixed(1)}px 0;gap:${(1*scale).toFixed(1)}px 20px;}
-    #printArea table{font-size:${(9.5*scale).toFixed(1)}px;}
-    #printArea th{font-size:${(8*scale).toFixed(1)}px;padding:${(2*scale).toFixed(1)}px ${(2*scale).toFixed(1)}px;}
-    #printArea td{padding:${(1.8*scale).toFixed(1)}px ${(2.5*scale).toFixed(1)}px;font-size:${(9.5*scale).toFixed(1)}px;}
-    #printArea .rsBoxRow{gap:${(6*scale).toFixed(1)}px;margin-top:${(6*scale).toFixed(1)}px;}
-    #printArea .rsBox h4{font-size:${(9*scale).toFixed(1)}px;padding:${(2*scale).toFixed(1)}px ${(6*scale).toFixed(1)}px;}
-    #printArea .rsBox .rsBoxBody{padding:${(3*scale).toFixed(1)}px ${(6*scale).toFixed(1)}px;font-size:${(9.5*scale).toFixed(1)}px;}
-    #printArea .rsGradeTable{font-size:${(8.3*scale).toFixed(1)}px;}
-    #printArea .rsRemarkGrid{gap:${(6*scale).toFixed(1)}px;margin-top:${(6*scale).toFixed(1)}px;}
-    #printArea .remarkBox h4{font-size:${(8.5*scale).toFixed(1)}px;padding:${(2*scale).toFixed(1)}px ${(6*scale).toFixed(1)}px;}
-    #printArea .remarkEdit{min-height:${(13*scale).toFixed(1)}px;padding:${(3*scale).toFixed(1)}px ${(6*scale).toFixed(1)}px;font-size:${(9.5*scale).toFixed(1)}px;}
-    #printArea .sigline{font-size:${(9.5*scale).toFixed(1)}px;}
-    #printArea .stampBox{height:${Math.round(44*scale)}px;font-size:${(9*scale).toFixed(1)}px;}
-    #printArea{padding:${(7*scale).toFixed(1)}mm ${(9*scale).toFixed(1)}mm;}
-  `;
+  // Fit the rendered sheet to the actual A4 printable area. Fewer subjects are
+  // enlarged and many subjects are reduced automatically.
+  const scaleCSS = `@media print{#printArea{width:190mm!important;}}`;
 
   app.innerHTML = `
     <div class="no-print" style="padding:14px;display:flex;gap:10px;justify-content:center;background:var(--surface);border-bottom:1px solid var(--border);">
@@ -1448,6 +1427,20 @@ function renderMockQuestion(idx){
     </div>
     ${mock.show_calculator ? `<button class="btn gold" style="position:fixed;bottom:16px;right:16px;border-radius:50%;width:52px;height:52px;font-size:20px;z-index:400;" onclick="toggleMockCalculator(true)">🧮</button>` : ''}
   `;
+
+  requestAnimationFrame(() => {
+    const sheet = $('printArea');
+    if (!sheet) return;
+    const targetHeightPx = 281 * 96 / 25.4;
+    const naturalHeight = sheet.scrollHeight;
+    let fitScale = targetHeightPx / naturalHeight;
+    fitScale = Math.max(0.52, Math.min(2.0, fitScale));
+    sheet.style.transform = `scale(${fitScale})`;
+    sheet.style.width = `calc(190mm / ${fitScale})`;
+    sheet.style.minHeight = '0';
+    sheet.style.margin = '0';
+    sheet.dataset.printScale = fitScale.toFixed(4);
+  });
 }
 function selectMockAnswer(idx, oi){ window._mockAnswers[idx] = oi; renderMockQuestion(idx); }
 function confirmSubmitMock(){
