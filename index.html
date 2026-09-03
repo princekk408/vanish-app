@@ -1033,11 +1033,30 @@ async function showPrintPage(studentId, classId, termId, backFnName){
   const fitA4 = () => {
     const sheet = $('printArea'); if (!sheet) return;
     const targetHeightPx = 281 * 96 / 25.4;
+    const targetWidthMm = 190;
+
+    // Measure the actual content without the artificial A4 min-height.
+    // This lets short results grow to use the whole page instead of leaving
+    // a large empty area between the remarks and signatures.
+    const oldMinHeight = sheet.style.minHeight;
+    const oldTransform = sheet.style.transform;
+    sheet.style.minHeight = '0';
+    sheet.style.transform = 'none';
+    sheet.style.width = `${targetWidthMm}mm`;
     const naturalHeight = Math.max(sheet.scrollHeight, 1);
-    const scale = Math.max(0.50, Math.min(1, targetHeightPx / naturalHeight));
+
+    // Short result = enlarge everything. Long result = shrink everything.
+    let scale = targetHeightPx / naturalHeight;
+    scale = Math.max(0.42, Math.min(1.55, scale));
+
+    // Compensate the CSS box dimensions so the transformed result remains
+    // exactly A4 printable size while all typography/spacing scales together.
     sheet.style.transform = `scale(${scale})`;
-    sheet.style.width = `calc(190mm / ${scale})`;
-    sheet.style.minHeight = '281mm';
+    sheet.style.transformOrigin = 'top left';
+    sheet.style.width = `calc(${targetWidthMm}mm / ${scale})`;
+    sheet.style.minHeight = `calc(281mm / ${scale})`;
+    sheet.style.margin = '0';
+    sheet.dataset.printScale = scale.toFixed(4);
   };
   requestAnimationFrame(()=>{fitA4();setTimeout(fitA4,150);setTimeout(fitA4,500);});
 }
