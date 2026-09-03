@@ -81,7 +81,7 @@ th{background:var(--surface-2);font-size:11.5px;text-transform:uppercase;letter-
 .rsLowerGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:6px;margin-top:6px}.rsPanel{border:1px solid #aeb7c2}.rsPanelTitle{background:#20364f;color:#fff;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;padding:3px 6px}.rsPanelBody{padding:4px 6px;font-size:8.5px}.rsAttendance{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}.rsAttendance div{background:#f3f5f7;border:1px solid #d3d8de;padding:4px;text-align:center}.rsAttendance b{display:block;font-size:10px;color:#172a46}.rsGradeScale{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px 6px;font-size:7.6px}.rsGradeScale span{padding:2px 0;border-bottom:1px dotted #ccd1d6}
 .rsRemarkGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}.remarkBox{border:1px solid #aeb7c2}.remarkBox h4{background:#e8edf2;color:#20364f;font-size:7.8px;text-transform:uppercase;letter-spacing:.04em;padding:3px 6px;margin:0}.remarkEdit{min-height:25px;padding:5px 6px;font-size:8.5px;outline:none;font-family:inherit;line-height:1.25}.remarkEdit:focus{background:#fffbe6}
 .rsSignGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:auto;padding-top:7px}.rsSign{border:1px solid #aeb7c2}.rsSign h4{background:#20364f;color:#fff;font-size:7.8px;text-transform:uppercase;padding:3px 5px}.rsSignBody{padding:5px;font-size:8.2px;min-height:38px}.rsSignLine{border-top:1px solid #69737e;margin-top:10px;padding-top:2px;font-size:7.5px}.rsFinalBar{display:grid;grid-template-columns:1fr 1.25fr .85fr;margin-top:6px;border:1px solid #aeb7c2}.rsFinalBar>div{padding:4px 6px;font-size:8px;border-right:1px solid #aeb7c2}.rsFinalBar>div:last-child{border-right:0}.rsFinalBar b{color:#536173;text-transform:uppercase;font-size:7.3px}.stampBox{height:42px;display:flex;align-items:center;justify-content:center;color:#7d8792;font-size:7.5px;text-transform:uppercase;letter-spacing:.08em}.no-print{flex-shrink:0}
-@page{size:A4;margin:8mm}*{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}@media print{html,body{width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body *{visibility:hidden}#printArea,#printArea *{visibility:visible}#printArea{position:absolute;left:10mm;top:8mm;margin:0!important;width:190mm!important;min-height:281mm!important;transform-origin:top left}.no-print{display:none!important}.remarkEdit{background:transparent!important}}
+@page{size:A4;margin:8mm}*{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}@media print{html,body{width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body *{visibility:hidden}#printArea,#printArea *{visibility:visible}#printArea{position:absolute;left:10mm;top:8mm;margin:0!important;width:calc(190mm / var(--print-scale, 1))!important;min-height:calc(281mm / var(--print-scale, 1))!important;transform:none!important;transform-origin:top left;zoom:var(--print-scale, 1)!important}.no-print{display:none!important}.remarkEdit{background:transparent!important}}
 </style>
 </head>
 <body>
@@ -1035,26 +1035,25 @@ async function showPrintPage(studentId, classId, termId, backFnName){
     const targetHeightPx = 281 * 96 / 25.4;
     const targetWidthMm = 190;
 
-    // Measure the actual content without the artificial A4 min-height.
-    // This lets short results grow to use the whole page instead of leaving
-    // a large empty area between the remarks and signatures.
-    const oldMinHeight = sheet.style.minHeight;
-    const oldTransform = sheet.style.transform;
+    // IMPORTANT: use CSS zoom instead of transform. Chrome's print renderer
+    // can recalculate/ignore transforms when the native print dialog opens,
+    // which was making the printed copy fall back to the small normal layout.
+    // CSS zoom is part of the layout used by the print renderer, so the same
+    // enlargement is retained on paper/PDF.
     sheet.style.minHeight = '0';
     sheet.style.transform = 'none';
+    sheet.style.zoom = '1';
     sheet.style.width = `${targetWidthMm}mm`;
-    const naturalHeight = Math.max(sheet.scrollHeight, 1);
 
-    // Short result = enlarge everything. Long result = shrink everything.
+    const naturalHeight = Math.max(sheet.scrollHeight, 1);
     let scale = targetHeightPx / naturalHeight;
     scale = Math.max(0.42, Math.min(1.55, scale));
 
-    // Compensate the CSS box dimensions so the transformed result remains
-    // exactly A4 printable size while all typography/spacing scales together.
-    sheet.style.transform = `scale(${scale})`;
-    sheet.style.transformOrigin = 'top left';
+    sheet.style.setProperty('--print-scale', scale.toFixed(4));
+    sheet.style.zoom = scale;
     sheet.style.width = `calc(${targetWidthMm}mm / ${scale})`;
     sheet.style.minHeight = `calc(281mm / ${scale})`;
+    sheet.style.transform = 'none';
     sheet.style.margin = '0';
     sheet.dataset.printScale = scale.toFixed(4);
   };
