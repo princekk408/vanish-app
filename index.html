@@ -2189,6 +2189,30 @@ setInterval(()=>{if(currentActor&&actorIs('admin','principal')){runServerBackup(
 })();
 </script>
 <script>
+/* V3 bug-fix hardening: make the authenticated legacy admin a real DB admin when safe. */
+(function(){
+  window.ensureCurrentAdminProfile=async function(){
+    const {data:{user}}=await sb.auth.getUser();
+    if(!user) return null;
+    let {data:prof,error}=await sb.from('rs_staff_profiles').select('*').eq('id',user.id).maybeSingle();
+    if(error) throw error;
+    if(!prof){
+      const {error:be}=await sb.rpc('rs_bootstrap_first_admin',{p_full_name:'Administrator'});
+      if(be) throw be;
+      const r=await sb.from('rs_staff_profiles').select('*').eq('id',user.id).maybeSingle();
+      if(r.error) throw r.error;
+      prof=r.data;
+    }
+    if(!prof) throw new Error('Administrator profile could not be created.');
+    if(prof.status!=='active'||prof.approved!==true||!['admin','principal'].includes(prof.role)) throw new Error('This account is not an approved administrator.');
+    window.v2Actor={...prof,permissions:prof.permissions||{}};
+    currentActor=window.v2Actor;
+    saveSession({role:'staff',actor:window.v2Actor});
+    return window.v2Actor;
+  };
+})();
+</script>
+<script>
 /* V3 final wiring: full backup payload + finance route compatibility. */
 (function(){
   window.v3DownloadBackup=async function(){
@@ -2200,6 +2224,31 @@ setInterval(()=>{if(currentActor&&actorIs('admin','principal')){runServerBackup(
   window.v3ServerBackup=async function(){const {data,error}=await sb.rpc('rs_create_backup');if(error)return toast(error.message,'error');toast('Server snapshot created','success');if(typeof v3Backups==='function')v3Backups()};
   /* Staff password recovery uses Supabase's secure email reset flow; no password is stored or exposed. */
   window.v3SendStaffReset=async function(email){if(!privileged())return toast('Not authorised','error');if(!email)return toast('Staff email is missing','error');const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)return toast(error.message,'error');toast('Password reset email sent to '+email,'success')};
+})();
+</script>
+<script>
+/* V3 final bug fixes: admin identity, publishing, analytics diagnostics, finance diagnostics. */
+(function(){
+  window.doAdminLogin=async function(){
+    const email=$('adminEmail')?.value.trim(),pass=$('adminPass')?.value,msg=$('loginMsg');
+    if(!email||!pass){msg.innerHTML='<div class="banner error">Enter email and password.</div>';return}
+    msg.innerHTML='<div class="banner info">Signing in securely…</div>';
+    const {error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error){msg.innerHTML='<div class="banner error">'+esc(error.message)+'</div>';return}
+    try{await ensureCurrentAdminProfile();await adminHome()}catch(e){await sb.auth.signOut();clearSession();msg.innerHTML='<div class="banner error">'+esc(errText(e))+'</div>'}
+  };
+  window.togglePublish=async function(pub){
+    if(!AState.classId||!AState.termId)return toast('Select class and term first','error');
+    if(actorIs('teacher','staff')){const u=(await sb.auth.getUser()).data.user?.id;const {error}=await sb.from('rs_approvals').upsert({class_id:AState.classId,term_id:AState.termId,submitted_by:u,status:'pending'},{onConflict:'class_id,term_id'});if(error)return toast(errText(error),'error');toast('Submitted to Admin/Principal for approval','success');return}
+    if(!actorIs('admin','principal')){try{await ensureCurrentAdminProfile()}catch(e){return toast('Not authorised: '+errText(e),'error')}}
+    if(pub){const {data:a,error:ae}=await sb.from('rs_approvals').select('status').eq('class_id',AState.classId).eq('term_id',AState.termId).eq('status','approved').maybeSingle();if(ae)return toast(errText(ae),'error');if(!a)return toast('This result has not been approved yet','error')}
+    const {error}=await sb.rpc('rs_set_publish',{p_class_id:AState.classId,p_term_id:AState.termId,p_published:pub});
+    if(error)return toast(errText(error),'error');toast(pub?'Result published':'Result unpublished','success');adminPublish();
+  };
+  const oldAnalytics=window.v3Analytics;
+  window.v3Analytics=async function(){try{if(!actorIs('admin','principal')){try{await ensureCurrentAdminProfile()}catch(e){return v2Shell('<div class="card"><div class="banner error">'+e3(errText(e))+'</div></div>','analytics')}}if(!AState.classId||!AState.termId)return v2Shell('<div class="card"><div class="banner info">Select a class and term in Setup first.</div></div>','analytics');return await oldAnalytics()}catch(e){return v2Shell('<div class="card"><div class="sectionKicker">Management Intelligence</div><h2>Analytics could not load</h2><div class="banner error">'+e3(errText(e))+'</div><p class="v2-muted">The existing result data was not changed.</p></div>','analytics')}};
+  const oldPost=window.v3PostPayment;
+  window.v3PostPayment=async function(){try{if(!actorIs('admin','principal','bursar')){try{await ensureCurrentAdminProfile()}catch(e){return toast('Not authorised: '+errText(e),'error')}}return await oldPost()}catch(e){toast('Payment failed: '+errText(e),'error')}};
 })();
 </script>
 </body>
